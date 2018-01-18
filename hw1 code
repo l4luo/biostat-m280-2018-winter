@@ -1,0 +1,2 @@
+Q2.1:
+wc -l < /home/m280-data/hw1/merge-geno.fam
