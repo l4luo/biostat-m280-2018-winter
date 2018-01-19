@@ -52,9 +52,9 @@ wc -l < /home/m280-data/hw1/merge-geno.fam
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
 ```{bash}
-
+awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq –c
 ```
-
+answer 2
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
 
 4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.
