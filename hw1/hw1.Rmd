@@ -48,6 +48,7 @@ Use Linux shell commands to answer following questions.
 ```{bash}
 wc -l < /home/m280-data/hw1/merge-geno.fam
 ```
+959 persons are in this data set. hi
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
 ```{bash}
