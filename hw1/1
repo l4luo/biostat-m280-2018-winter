@@ -1,6 +1,0 @@
-
-1. How many persons are in the data set (statisticians call this n)? How many SNPs are in the data set (statisticians call this p)?
-    wc -l < /home/m280-data/hw1/merge-geno.fam
-    959 people in the dataset
-    
-    
