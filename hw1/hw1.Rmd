@@ -7,20 +7,24 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(eval = TRUE)
 ```
 
 ## Q1. Git/GitHub
 
 **No handwritten homework reports are accepted for this course.** We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.
 
-1. Apply for the [Student Developer Pack](https://education.github.com/pack) at GitHub using your UCLA email.
+1. Apply for the [Student Developer Pack](https://education.github.com/pack) at GitHub using your UCLA email.  
+    *Yes I did. My Github handle is @l4luo.*
 
-2. Create a **private** repository `biostat-m280-2018-winter` and add `Hua-Zhou` and `juhkim111` as your collaborators with write permission.
+2. Create a **private** repository `biostat-m280-2018-winter` and add `Hua-Zhou` and `juhkim111` as your collaborators with write permission.  
+    *Completed.*
 
-3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`. The `develop` branch will be your main playground, the place where you develop solution (code) to homework problems and write up report. The `master` branch will be your presentation area. Submit your homework files (R markdown file `Rmd`, `html` file converted from R markdown, all code and data sets to reproduce results) in `master` branch.
+3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`. The `develop` branch will be your main playground, the place where you develop solution (code) to homework problems and write up report. The `master` branch will be your presentation area. Submit your homework files (R markdown file `Rmd`, `html` file converted from R markdown, all code and data sets to reproduce results) in `master` branch.  
+    *Completed.*
 
-4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.
+4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.  
+    *Understood.*
 
 ## Q2. Linux Shell Commands
 
@@ -47,14 +51,15 @@ Use Linux shell commands to answer following questions.
 
 1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?
 
-    The number of persons in this data set is:
-```{bash}
-wc -l < /home/m280-data/hw1/merge-geno.fam
-```
+    *The number of persons in this data set is:*
+    ```{bash}
+    wc -l < /home/m280-data/hw1/merge-geno.fam
+    ```
+    
 * *959 persons are in this data set. 8348674 SNPs are in this dataset.*
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
-```{bash}
+```{bash, eval=FALSE}
 awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq –c
 ```
 answer 2
