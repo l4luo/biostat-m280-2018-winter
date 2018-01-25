@@ -1,6 +1,7 @@
 ---
 title: "Biostat M280 Homework 1"
 subtitle: Due Jan 26 @ 11:59PM
+author: Solutions by Landi Luo
 output: html_document
 ---
 
@@ -45,6 +46,8 @@ Please, do **not** put these data files into Git; they are huge. You even don't 
 Use Linux shell commands to answer following questions. 
 
 1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?
+
+    The number of persons in this data set is:
 ```{bash}
 wc -l < /home/m280-data/hw1/merge-geno.fam
 ```
@@ -62,14 +65,14 @@ answer 2
       - Mendel's SNP definition file is similar to the plink `bim` file but has format  
       `SNP ID`, `Chromosome`, `Base Pair Position`  
       with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like
-    ```{bash, echo=FALSE, eval=TRUE}
+    ```{bash, echo=FALSE, eval=FALSE}
     head mendel_snpdef.txt
     ```
     
     - Mendel's pedigree file is similar to the plink `fam` file but has format  
     `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
     with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs. First few lines of the Mendel pedigree should look like
-    ```{bash, echo=FALSE, eval=TRUE}
+    ```{bash, echo=FALSE, eval=FALSE}
     head -20 mendel_ped.txt
     ```
 
