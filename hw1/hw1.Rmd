@@ -80,6 +80,9 @@ Use Linux shell commands to answer following questions.
     ```{bash, echo=FALSE, eval=FALSE}
     head mendel_snpdef.txt
     ```
+    ```{bash}
+    
+    ```
     
     - Mendel's pedigree file is similar to the plink `fam` file but has format  
     `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
