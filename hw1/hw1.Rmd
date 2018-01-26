@@ -92,6 +92,10 @@ Use Linux shell commands to answer following questions.
     head -20 mendel_ped.txt
     ```
 
+    ```{bash}
+    
+    ```
+
 ## Q3. R Batch Run
 
 In class we discussed using R to organize simulation studies. 
