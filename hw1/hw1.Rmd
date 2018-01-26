@@ -81,7 +81,7 @@ Use Linux shell commands to answer following questions.
     head mendel_snpdef.txt
     ```
 
-     - *I reformatted the plink `merge-geno.bim` data set to be readable by Mendel software, and then I piped the output to a new text file "mendelSNP."*
+     - *I reformatted the plink `merge-geno.bim` data set to be readable by Mendel software, and then I piped the output to a new text file `mendelSNP`.*
     ```{bash}
     awk 'BEGIN {print "2.40 = FILE FORMAT VERSION NUMBER.\n" "8348674  = NUMBER OF SNPS LISTED HERE."} {OFS = ","} {print $2, $1, $4}' /home/m280-data/hw1/merge-geno.bim > mendelSNP
     head mendelSNP
@@ -93,13 +93,11 @@ Use Linux shell commands to answer following questions.
     ```{bash, echo=FALSE, eval=FALSE}
     head -20 mendel_ped.txt
     ```
-   -*I converted the plink `merge-geno.fam` file to Mendel pedigree format, and then I piped the output to a text file "mendelPed."*
+     - *I converted the plink `merge-geno.fam` file to Mendel pedigree format, and then I piped the output to a text file `mendelPed`.*
     ```{bash}
     awk '{printf "%s,%s,%s,%s,%s,\n", $1, substr($2,5), $3==0 ? "" : substr($3,5), $4==0 ? "" : substr($4,5), $5==1 ? "M" : "F"}' /home/m280-data/hw1/merge-geno.fam > mendelPed 
     head -20 mendelPed
     ```
-=======
->>>>>>> ab019739ef8c014db53f2c70a30f0eccbbe0395e
 
 ## Q3. R Batch Run
 
