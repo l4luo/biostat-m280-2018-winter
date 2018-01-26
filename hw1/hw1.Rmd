@@ -80,8 +80,11 @@ Use Linux shell commands to answer following questions.
     ```{bash, echo=FALSE, eval=FALSE}
     head mendel_snpdef.txt
     ```
+     - *I reformatted the data set to be readable by Mendel software. I then piped the output to a new text file "mendelSNP" and moved it to my "hw1" folder. *
     ```{bash}
-    
+    awk 'BEGIN {print "2.40 = FILE FORMAT VERSION NUMBER.\n" "8348674  = NUMBER OF SNPS LISTED HERE."} {OFS = ","} {print $2, $1, $4}' /home/m280-data/hw1/merge-geno.bim > mendelSNP
+    mv mendelSNP /home/l4luo/biostat-m280-2018-winter/hw1
+    head -10 /home/l4luo/biostat-m280-2018-winter/hw1/mendelSNP
     ```
     
     - Mendel's pedigree file is similar to the plink `fam` file but has format  
