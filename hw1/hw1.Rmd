@@ -15,13 +15,13 @@ knitr::opts_chunk$set(eval = TRUE)
 **No handwritten homework reports are accepted for this course.** We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.
 
 1. Apply for the [Student Developer Pack](https://education.github.com/pack) at GitHub using your UCLA email.  
-    *Yes I did. My Github handle is @l4luo.*
+    *I completed this step. My Github handle is @l4luo.*
 
 2. Create a **private** repository `biostat-m280-2018-winter` and add `Hua-Zhou` and `juhkim111` as your collaborators with write permission.  
-    *Completed.*
+    *I created a private repo and added `Hua-Zhou` and `juhkim111` as collaborators.*
 
 3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`. The `develop` branch will be your main playground, the place where you develop solution (code) to homework problems and write up report. The `master` branch will be your presentation area. Submit your homework files (R markdown file `Rmd`, `html` file converted from R markdown, all code and data sets to reproduce results) in `master` branch.  
-    *Completed.*
+    *I created a `master` and `develop` branch and created a `hw1` directory in each branch.*
 
 4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.  
     *Understood.*
@@ -69,7 +69,8 @@ Use Linux shell commands to answer following questions.
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?  
   *The number of SNPs that are located within the MAP4 gene is:*
     ```{bash}
-    awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769)print}' /home/m280-data/hw1/merge-geno.bim | wc -l
+    awk '{if ($1 == 3 && $4 >= 47892180 && $4 <= 48130769)print}'   \
+    /home/m280-data/hw1/merge-geno.bim | wc -l
     ```
 
 4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.
@@ -83,7 +84,9 @@ Use Linux shell commands to answer following questions.
 
      - *I reformatted the plink `merge-geno.bim` data set to be readable by Mendel software, and then I piped the output to a new text file `mendelSNP`.*
     ```{bash}
-    awk 'BEGIN {print "2.40 = FILE FORMAT VERSION NUMBER.\n" "8348674  = NUMBER OF SNPS LISTED HERE."} {OFS = ","} {print $2, $1, $4}' /home/m280-data/hw1/merge-geno.bim > mendelSNP
+    awk 'BEGIN {print "2.40 = FILE FORMAT VERSION NUMBER.\n"   \
+    "8348674  = NUMBER OF SNPS LISTED HERE."} {OFS = ","} {print $2, $1, $4}'  \
+    /home/m280-data/hw1/merge-geno.bim > mendelSNP
     head mendelSNP
     ```
     
@@ -95,7 +98,9 @@ Use Linux shell commands to answer following questions.
     ```
      - *I converted the plink `merge-geno.fam` file to Mendel pedigree format, and then I piped the output to a text file `mendelPed`.*
     ```{bash}
-    awk '{printf "%s,%s,%s,%s,%s,\n", $1, substr($2,5), $3==0 ? "" : substr($3,5), $4==0 ? "" : substr($4,5), $5==1 ? "M" : "F"}' /home/m280-data/hw1/merge-geno.fam > mendelPed 
+    awk '{printf "%s,%s,%s,%s,%s,\n", $1, substr($2,5), $3==0 ? "" :   \
+    substr($3,5), $4==0 ? "" : substr($4,5), $5==1 ? "M" : "F"}'   \
+    /home/m280-data/hw1/merge-geno.fam > mendelPed 
     head -20 mendelPed
     ```
 
