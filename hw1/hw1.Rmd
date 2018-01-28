@@ -131,7 +131,7 @@ isPrime = function(n) {
 }
 
 ## estimate mean only using observations with prime indices
-estMeanPrimes = function (x) {
+estMeanPrimes = function(x) {
   n <- length(x)
   ind <- sapply(1:n, isPrime) 
   return (mean(x[ind])) 
@@ -151,12 +151,30 @@ avgMSE <- function(seed, n, dist, rep, whichMean) {
   return(sum((x1)^2)/rep)
 }
 
-#sample result
-result <- c(avgMSE(280, 100, "gaussian", 50, mean), 
-            avgMSE(280, 100, "gaussian", 50, estMeanPrimes))
+#call function
+c(avgMSE(seed, n, dist, rep, mean), avgMSE(seed, n, dist, rep, estMeanPrimes))
     ```
 
 2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
+
+    ```{r}
+nVals <- seq(100, 500, by=100)
+distVals <- c("gaussian", "t1", "t5")
+seed <- 280
+rep <- 50
+
+for (n in nVals) {
+  for (dist in distVals) {
+    oFile <- paste(dist, "_n", n, ".txt", sep="")
+    arg <- paste(paste("seed=", seed, sep=""), paste("n=", n, sep=""), 
+                 paste("'dist=\"", dist, "\"'", sep=""), paste("rep=", rep, sep=""))
+    sysCall <- paste("nohup Rscript runSim.R ", arg, " > ", oFile)
+    system(sysCall)
+    print(paste("sysCall=", sysCall, sep=""))
+  }
+}
+    ```
+
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
