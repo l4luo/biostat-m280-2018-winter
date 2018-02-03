@@ -1,9 +1,9 @@
-## parsing command arguments
+# parsing command arguments
 for (arg in commandArgs(TRUE)) {
   eval(parse(text = arg))
 }
 
-## check if a given integer is prime
+# check if a given integer is prime
 isPrime <- function(n) {
   if (n <= 3) {
     return (TRUE)
@@ -14,15 +14,15 @@ isPrime <- function(n) {
   return (TRUE)
 }
 
-## estimate mean only using observations with prime indices
+# estimate mean only using observations with prime indices
 estMeanPrimes <- function (x) {
   n <- length(x)
-  ind <- sapply(1:n, isPrime) #a vector of T/Fs, T=prime
-  return (mean(x[ind])) #mean of x values where ind=T
+  ind <- sapply(1:n, isPrime) # a vector of T/Fs, T=prime
+  return (mean(x[ind])) # mean of x values where ind=T
 }
 
-## function to generate distributions
-## argument whichMean: specify either estMeanPrime or mean
+# function to generate distributions
+# argument whichMean: specify either estMeanPrime or mean
 avgMSE <- function(seed, n, dist, rep, whichMean) {
   set.seed(seed)
   if (dist == "gaussian") {
