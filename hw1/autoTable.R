@@ -17,4 +17,4 @@ MSETable <- cbind(nLabs, methodLabs, tableDF)
 library(knitr)
 options(knitr.kable.NA = '')
 kable(MSETable, col.names = c("$n$", "Method", "$t_1$", "$t_5$", "Gaussian"),
-                             align = "l", digits = 3)
+                              align = "l", digits = 3)

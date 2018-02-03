@@ -32,7 +32,7 @@ avgMSE <- function(seed, n, dist, rep, whichMean) {
   } else if (dist == "t5") {
     x1 <- replicate(rep, whichMean(rt(n, df = 5)))
   }
-  return(sum((x1)^2)/rep)
+  return (sum((x1)^2)/rep)
 }
 
 c(avgMSE(seed, n, dist, rep, mean), avgMSE(seed, n, dist, rep, estMeanPrimes))
