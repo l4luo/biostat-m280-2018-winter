@@ -24,7 +24,7 @@ knitr::opts_chunk$set(eval = TRUE)
     *I created a `master` and `develop` branch and created a `hw1` directory in each branch.*
 
 4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time. That means if you tag your `hw1` submission after deadline, penalty points will be deducted for late submission.  
-    *Understood.*
+    *I will tag the `hw` submission after merging the develop with the master branch.*
 
 ## Q2. Linux Shell Commands
 
@@ -113,29 +113,16 @@ $$
   \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
 $$
 for both methods.
-    - *I expanded the `runSim.R` code and added a function (avgMSE) to generate data according to the specified arguments: `dist` for distribution type (gaussian, t1, or t5); `seed` for a random seed; `n` for sample size; `rep` for the number of simulation replicates; `whichMean` to specify which average estimator to compute (estMeanPrimes for the primed-indexed average estimator or mean for the classical sample average estimator).*
+    - *I expanded the `runSim.R` script and added a function (avgMSE) to generate data according to the specified arguments: `dist` for distribution type (gaussian, t1, or t5); `seed` for a random seed; `n` for sample size; `rep` for the number of simulation replicates; `whichMean` to specify which average estimator to compute (estMeanPrimes for the primed-indexed average estimator or mean for the classical sample average estimator).*
     
-2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`. 
-
+2. Modify the [`autoSim.R`](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 280`.   
+    - *I modified the `autoSim.R` script to automatically set specified arguments for the `runSim.R` script. I then ran the Rscript in batch mode via the Linux terminal by calling the bash command below. 15 text files were outputted with the data generated from each run of `runSim.R`.*  
     ```{bash}
     Rscript autoSim.R
     ```
 
-3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
-
-| $n$ | Method   | $t_1$ | $t_5$ | Gaussian |
-|-----|----------|-------|-------|----------|
-| 100 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 200 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 300 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 400 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-| 500 | PrimeAvg |       |       |          |
-|     | SampAvg  |       |       |          |
-
+3. Write an R script to collect simulation results from output files and print average MSEs in a table of format  
+    - *I wrote an Rscript `autoTable.R` that prints the average MSEs in a table.*  
     ```{bash, results = 'asis'}
-    Rscript autoTable.R 
+    Rscript autoTable.R
     ```
