@@ -1,0 +1,52 @@
+---
+title: "Biostat M280 Homework 2"
+subtitle: Due Feb 16 @ 11:59PM
+author: "Landi Luo"
+date: "2/12/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1
+
+Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
+
+### Exercise 7.3.4
+
+1. Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
+    x variable has minimum value = 0 and maximum value = 10.74.
+    y variable has range 0 to 58.9.
+    z variable has range 0 to 31.8. 
+    ```{r}
+    ggplot(data = diamonds) + 
+      geom_histogram(mapping = aes(x = x), binwidth = 0.5)  
+    diamonds %>%
+      count(min(x), max(x))
+    
+    ggplot(data = diamonds) + 
+      geom_histogram(mapping = aes(x = y), binwidth = 0.5)
+    diamonds %>%
+      count(min(y), max(y))
+    
+    ggplot(data = diamonds) + 
+      geom_histogram(mapping = aes(x = z), binwidth = 0.5)
+    diamonds %>%
+      count(min(z), max(z))
+    
+    ```
+
+
+## Q2 (optional)
+
+Read [Chapter 23](http://r4ds.had.co.nz/model-basics.html) (Model Basics) and [Chapter 24](http://r4ds.had.co.nz/model-building.html) (Model Building) of _R for Data Science_ and do exercises 24.2.3 and 24.3.5.
+
+## Q3
+
+Redo HW1 Q2 using tidyverse.
+
+## Q4 (optional)
+
+Redo HW1 Q3 on Hoffman2, except now we want to submit each `runSum.R` job to a different node in the cluster.
