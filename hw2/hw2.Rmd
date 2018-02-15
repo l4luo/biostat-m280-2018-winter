@@ -22,9 +22,15 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       install.packages("nycflights13", repos = "http://cran.rstudio.com/")
     if (!"ggstance" %in% rownames(installed.packages()))  
       install.packages("ggstance", repos = "http://cran.rstudio.com/")
+    if (!"lvplot" %in% rownames(installed.packages()))  
+      install.packages("lvplot", repos = "http://cran.rstudio.com/")
+    if (!"ggbeeswarm" %in% rownames(installed.packages()))  
+      install.packages("ggbeeswarm", repos = "http://cran.rstudio.com/")
     library(tidyverse)
     library(nycflights13)
     library(ggstance)
+    library(lvplot)
+    library(ggbeeswarm)
     ```
 
 ### Exercise 7.3.4
@@ -71,6 +77,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       count(price)
     
     ```
+
 3. How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?  
     *23 diamonds are 0.99 carat, and 1558 diamonds are 1 carat. This may be because 1 carat diamonds can sell for a much higher price than 0.99 carat diamonds, because the whole number seems like a lot more. *  
     ```{r}
@@ -163,6 +170,59 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ggplot(data = diamonds) +
       geom_boxplot(aes(x = cut, y = carat))
     ```
+
+3. Install the ggstance package, and create a horizontal boxplot. How does this compare to using `coord_flip()`?  
+    *While the resulting boxplots appear to be the same, using the ggstance function is more intuitive as we can denote the x- and y-axes as they are, rather than flipping the labels and then using coord_flip().*
+    ```{r}
+    # using ggstance
+    ggplot(data = diamonds) + 
+      geom_boxploth(aes(x = carat, y = cut))
+    
+    # using coord_flip()
+    ggplot(data = diamonds) + 
+      geom_boxplot(aes(x = cut, y = carat)) + coord_flip()
+    ```
+
+4. One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using `geom_lv()` to display the distribution of price vs cut. What do you learn? How do you interpret the plots?  
+    *The letter value plot is more informative, as it doesn't overemphasize outlier values. There are much fewer values that are considered outliers in the letter value plot compared to the conventional boxplot. While the boxplot showed that fair cut diamonds had the highest median prices, the letter value plot reveals that the ideal cut diamonds have a wider spread in their prices. As the diamond cut improves, there are more diamonds with higher prices. We could not observe this pattern using the boxplot. This is because the letter value plot includes those higher prices that the boxplot calculations leave out as outliers.*
+    ```{r}
+    ggplot(diamonds) + 
+      geom_lv(aes(x = cut, y = price))
+    ggplot(diamonds) + 
+      geom_boxplot(aes(x = cut, y = price))
+    ```
+
+5. Compare and contrast `geom_violin()` with a facetted `geom_histogram()`, or a coloured `geom_freqpoly()`. What are the pros and cons of each method?  
+    *`geom_violin()` is more useful for comparing the diamond prices among the different color categories. We can see that D colored diamonds have the lowest price, and we can see an increasing price trend from D to J. `geom_histogram()` and `geom_freqpoly()` are more useful for looking at the distribution of prices within each color category. We can see the peaks of each color, showing the most common price for that color. *
+    ```{r}
+    ggplot(data = diamonds) +
+      geom_violin(aes(x = color, y = price)) 
+    ggplot(data = diamonds) +
+      geom_histogram(aes(x = price), binwidth = 500) +
+      facet_wrap(~ color)
+    ggplot(data = diamonds) +
+      geom_freqpoly(aes(x = price, color = color), binwidth = 500) +
+      facet_wrap(~ color)
+    ```
+
+6. If you have a small dataset, it’s sometimes useful to use `geom_jitter()` to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to `geom_jitter()`. List them and briefly describe what each one does.  
+    *`geom_quasirandom` jitters the points to reduce overplotting using the vipor package. In our case, it created a violin plot. `geom_beeswarm` jitters the points to reduce overplotting using the beeswarm package.*
+    ```{r}
+    ggplot(data = diamonds) +
+      geom_jitter(aes(x = cut, y = price, color = cut)) 
+    ggplot(data = diamonds) +
+      geom_quasirandom(aes(x = cut, y = price, color = cut)) 
+  #  ggplot(data = diamonds) +
+  #    geom_beeswarm(aes(x = cut, y = price)) 
+    ```
+
+### Exercise 7.5.2.1  
+
+1. How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?  
+    **
+```{r}
+
+```
 
 
 ## Q2 (optional)
