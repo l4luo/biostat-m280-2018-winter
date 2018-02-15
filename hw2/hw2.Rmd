@@ -206,23 +206,44 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 6. If you have a small dataset, it’s sometimes useful to use `geom_jitter()` to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to `geom_jitter()`. List them and briefly describe what each one does.  
-    *`geom_quasirandom` jitters the points to reduce overplotting using the vipor package. In our case, it created a violin plot. `geom_beeswarm` jitters the points to reduce overplotting using the beeswarm package.*
+    *As the diamonds dataset is quite large, I chose to use the mpg dataset to explore the ggbeeswarm package. `geom_quasirandom()` jitters the points to reduce overplotting using the vipor package. `geom_beeswarm()` jitters the points to reduce overplotting using the beeswarm package. There appears to be slight differences in the way the points are jittered among the three methods. `geom_quasirandom()` and `geom_beeswarm()` seem to create violin plots and jitter the points.*
     ```{r}
-    ggplot(data = diamonds) +
-      geom_jitter(aes(x = cut, y = price, color = cut)) 
-    ggplot(data = diamonds) +
-      geom_quasirandom(aes(x = cut, y = price, color = cut)) 
-  #  ggplot(data = diamonds) +
-  #    geom_beeswarm(aes(x = cut, y = price)) 
+    ggplot(data = mpg) +
+      geom_jitter(aes(x = class, y = cty, color = class)) 
+    ggplot(data = mpg) +
+      geom_quasirandom(aes(x = class, y = cty, color = class)) 
+    ggplot(data = mpg) +
+      geom_beeswarm(aes(x = class, y = cty, color = class)) 
     ```
 
 ### Exercise 7.5.2.1  
 
 1. How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?  
-    **
-```{r}
+    *To more clearly show the distribution of cut within color, I would first separate the data by color and then calculate the proportion of each cut within each color. To show the distribution of color within cut, I would group the data by cut and then calculate the proportions of each color within each cut.*
+    ```{r}
+    diamonds %>% 
+      count(color, cut) %>%
+      group_by(color) %>%
+      mutate(prop = n / sum(n)) %>%
+    ggplot(aes(x = color, y = cut, fill = prop)) +
+      geom_tile() +
+      scale_fill_distiller(palette = "Spectral")
+    
+    diamonds %>% 
+      count(color, cut) %>%
+      group_by(cut) %>%
+      mutate(prop = n / sum(n)) %>%
+    ggplot(aes(x = color, y = cut, fill = prop)) +
+      geom_tile() +
+      scale_fill_distiller(palette = "Spectral")
+    ```
 
-```
+2. Use `geom_tile()` together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?  
+    **
+    ```{r}
+    
+    ```
+
 
 
 ## Q2 (optional)
