@@ -53,7 +53,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ggplot(data = diamonds) + 
       geom_histogram(mapping = aes(x = price), binwidth = 100)
     
-    #explore unusual price gap
+    # explore unusual price gap
     diamonds %>%
       filter(price > 1000 & price < 2000) %>%
       count(cut_width(price, 100))
@@ -71,9 +71,9 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 4. Compare and contrast `coord_cartesian()` vs `xlim()` or `ylim()` when zooming in on a histogram. What happens if you leave `binwidth` unset? What happens if you try and zoom so only half a bar shows?  
-    *When we leave `binwidth` unset, R generates an automatic binwidth along with a warning message. Using coord_cartesian keeps the bin around 5, whereas using x_lim doesn't.  *  
+    *When we leave `binwidth` unset, R generates an automatic binwidth along with a warning message. When we use `xlim()` and `ylim()` to zoom in on the data, R generates a warning message: "Removed 36329 rows containing non-finite values (stat_bin)." We can see that the histogram does not display bins past 4.9, whereas using `coord_cartesian()` keeps the values between 4.9 and 5.0.*  
     ```{r}
-    #leaving binwidth unset
+    # leaving binwidth unset
     ggplot(data = diamonds) + 
       geom_histogram(mapping = aes(x = x))
     
@@ -85,7 +85,35 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       geom_histogram(mapping = aes(x = x), binwidth = 0.1) +
       coord_cartesian(xlim = c(3,5), ylim = c(0,4000))
     ```
+
+### Exercise 7.4.1  
+
+1. What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?  
+    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values...are also removed?? *
+    ```{r}
+    # explore missing values in a histogram
+    diamonds3 <- diamonds %>%
+      mutate(y = ifelse(between(y, 3, 20), y, NA))
+    ggplot(data = diamonds3) +
+      geom_histogram(mapping = aes(x = y), binwidth = 0.5)
     
+    # explore missing values in a bar chart
+    diamonds3 <- diamonds %>%
+      mutate(color = ifelse(color == "I", NA, color))
+    ggplot(data = diamonds3) +
+      geom_bar(aes(x = color))
+    
+    ```
+
+2. What does `na.rm = TRUE` do in `mean()` and `sum()`?  
+    *The `na.rm = TRUE` removes NA values when carrying out the `mean()` and `sum()` calculations.*  
+    ```{r}
+    mean(diamonds3$y, na.rm = FALSE)
+    mean(diamonds3$y, na.rm = TRUE)
+    ```
+
+### Exercise 7.5.1.1
+
 
 ## Q2 (optional)
 
