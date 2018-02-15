@@ -12,17 +12,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Q1
 
-Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.
+Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
+
+    ```{r}
+    # load packages and datasets
+    if (!"tidyverse" %in% rownames(installed.packages()))  
+      install.packages("tidyverse", repos = "http://cran.rstudio.com/")
+    if (!"nycflights13" %in% rownames(installed.packages()))  
+      install.packages("nycflights13", repos = "http://cran.rstudio.com/")
+    if (!"ggstance" %in% rownames(installed.packages()))  
+      install.packages("ggstance", repos = "http://cran.rstudio.com/")
+    library(tidyverse)
+    library(nycflights13)
+    library(ggstance)
+    ```
 
 ### Exercise 7.3.4
 
 1. Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.  
     *The x variable has minimum value = 0 and maximum value = 10.74. The y variable has range 0 to 58.9. The z variable has range 0 to 31.8. When we look at the histograms of each variable, we can see that the distribution concentrates around 0 to 15, so I removed the outliers to better compare the variables. Thinking about the dimensions of a diamond, I would expect the length and width distributions to be approximately the same, and I would expect the depth to have smaller values in general. Comparing the three histograms as well as the scatterplot, the x and y variables have similar distributions so I would guess that x and y are the length and width, and z is the depth. *   
     ```{r}
-    if (!"tidyverse" %in% rownames(installed.packages()))  
-      install.packages("tidyverse", repos = "http://cran.rstudio.com/")
-    library(tidyverse)
-    
     # explore range of x, y, and z
     count(diamonds, min(x), max(x))
     count(diamonds, min(y), max(y))
@@ -93,9 +102,9 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```{r}
     # explore missing values in a histogram
     diamonds3 <- diamonds %>%
-      mutate(y = ifelse(between(y, 3, 20), y, NA))
+      mutate(x = ifelse(x > 3 & x < 15, x, NA))
     ggplot(data = diamonds3) +
-      geom_histogram(mapping = aes(x = y), binwidth = 0.5)
+      geom_histogram(mapping = aes(x = x), binwidth = 0.5)
     
     # explore missing values in a bar chart
     diamonds3 <- diamonds %>%
@@ -105,14 +114,55 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     
     ```
 
-2. What does `na.rm = TRUE` do in `mean()` and `sum()`?  
-    *The `na.rm = TRUE` removes NA values when carrying out the `mean()` and `sum()` calculations.*  
+2. What does `na.rm = TRUE` do in `mean()` and `sum()`?    
+    *The `na.rm = TRUE` removes NA values when carrying out the `mean()` and `sum()` calculations. Otherwise, it will return "NA" if there are NA values in the dataset.*  
     ```{r}
-    mean(diamonds3$y, na.rm = FALSE)
-    mean(diamonds3$y, na.rm = TRUE)
+    diamonds3 <- diamonds %>%
+      mutate(x = ifelse(x > 3 & x < 15, x, NA))
+    mean(diamonds3$x, na.rm = FALSE)
+    mean(diamonds3$x, na.rm = TRUE)
+    sum(diamonds3$x, na.rm = FALSE)
+    sum(diamonds3$x, na.rm = TRUE)
     ```
 
-### Exercise 7.5.1.1
+### Exercise 7.5.1.1  
+1. Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.  
+    *I used boxplots to compare the departure times of cancelled vs. non-cancelled flights. Cancelled flights should have either missing departure times or arrival times (from chapter 5 of "R For Data Science").*
+    ```{r}
+    flights2 <- flights %>%
+      mutate(cancelled = is.na(dep_time) | is.na(arr_time))
+    ggplot(data = flights2) +
+      geom_boxplot(aes(x = cancelled, y = dep_time))
+    ```
+
+2. What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?  
+    *The diamond's carat is most important for predicting the price of a diamond. When we look at the scatterplot, there is a clear positive correlation between carat and price. Looking at the correlation between carat and cut, it appears that diamonds with "fair" cut have the highest carat, while the highest quality cut "ideal" has the lowest carat. This seems counterintuitive, as we would expect better quality diamonds to have higher carat. But the fact that "fair" cut diamonds have a higher carat does help explain the reason why lower quality diamonds are more expensive.*  
+    ```{r}
+    
+    # explore relationships between price and other variables
+    ggplot(data = diamonds) +
+      geom_point(aes(x = carat, y = price))
+    ggplot(data = diamonds) +
+      geom_point(aes(x = depth, y = price))
+    ggplot(data = diamonds) +
+      geom_point(aes(x = table, y = price))
+    ggplot(data = diamonds) +
+      geom_point(aes(x = x, y = price))
+    ggplot(data = diamonds) +
+      geom_point(aes(x = y, y = price))
+    ggplot(data = diamonds) +
+      geom_point(aes(x = z, y = price))
+    ggplot(data = diamonds) +
+      geom_boxplot(aes(x = cut, y = price))
+    ggplot(data = diamonds) +
+      geom_boxplot(aes(x = color, y = price))
+    ggplot(data = diamonds) +
+      geom_boxplot(aes(x = clarity, y = price))
+    
+    # relationship between carat and cut
+    ggplot(data = diamonds) +
+      geom_boxplot(aes(x = cut, y = carat))
+    ```
 
 
 ## Q2 (optional)
