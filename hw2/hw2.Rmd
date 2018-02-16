@@ -333,7 +333,7 @@ Read [Chapter 23](http://r4ds.had.co.nz/model-basics.html) (Model Basics) and [C
 
 ## Q3
 
-Redo HW1 Q2 using tidyverse.
+Redo HW1 Q2 using tidyverse.  
 
     ```{r}
     # import Mendel datasets into R
@@ -350,7 +350,7 @@ Redo HW1 Q2 using tidyverse.
     ```
 
 
-1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?  
+1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?    
     *The number of persons in this data set is:*  
     ```{r}
     count(mendel_fam)
@@ -359,6 +359,15 @@ Redo HW1 Q2 using tidyverse.
     ```{r}
     count(mendel_bim)
     ```
+
+2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?  
+    *The first column lists the chromosomes that this data set contains. The second column lists the number of SNPs for each chromosome.*
+    ```{r}
+    mendel_bim %>%
+      count(Chromosome)
+    ```
+
+
     
 
 ## Q4 (optional)
