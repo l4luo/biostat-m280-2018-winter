@@ -87,7 +87,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 4. Compare and contrast `coord_cartesian()` vs `xlim()` or `ylim()` when zooming in on a histogram. What happens if you leave `binwidth` unset? What happens if you try and zoom so only half a bar shows?  
-    *When we leave `binwidth` unset, R generates an automatic binwidth along with a warning message. When we use `xlim()` and `ylim()` to zoom in on the data, R generates a warning message: "Removed 36329 rows containing non-finite values (stat_bin)." We can see that the histogram does not display bins past 4.9, whereas using `coord_cartesian()` keeps the values between 4.9 and 5.0.*  
+    *When we leave `binwidth` unset, R generates an automatic binwidth along with a warning message. When we use `xlim()` and `ylim()` to zoom in on the data, R generates a warning message: "Removed 36329 rows containing non-finite values (stat_bin)." We can see that the histogram does not display bins past 4.9, whereas using `coord_cartesian()` keeps the values between 4.9 and 5.0. The histogram that uses `coord_cartesian()` is zoomed in so that only half a bar shows.*  
     ```{r}
     # leaving binwidth unset
     ggplot(data = diamonds) + 
@@ -105,7 +105,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 ### Exercise 7.4.1  
 
 1. What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?  
-    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values...are also removed?? *
+    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values are allocated to a new category NA. *
     ```{r}
     # explore missing values in a histogram
     diamonds3 <- diamonds %>%
@@ -117,7 +117,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     diamonds3 <- diamonds %>%
       mutate(color = ifelse(color == "I", NA, color))
     ggplot(data = diamonds3) +
-      geom_bar(aes(x = color))
+      geom_bar(aes(x = as.character(color)))
     
     ```
 
@@ -137,9 +137,9 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     *I used boxplots to compare the departure times of cancelled vs. non-cancelled flights. Cancelled flights should have either missing departure times or arrival times (from chapter 5 of "R For Data Science").*
     ```{r}
     flights2 <- flights %>%
-      mutate(cancelled = is.na(dep_time) | is.na(arr_time))
+      mutate(cancelled = is.na(dep_time))
     ggplot(data = flights2) +
-      geom_boxplot(aes(x = cancelled, y = dep_time))
+      geom_boxplot(aes(x = cancelled, y = sched_dep_time))
     ```
 
 2. What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?  
