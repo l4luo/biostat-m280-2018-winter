@@ -239,9 +239,18 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 2. Use `geom_tile()` together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?  
-    **
+    *The plot is difficult to interpret because there are too many destinations. One solution is to sort the destinations *
     ```{r}
-    
+    flights %>% 
+      group_by(month, dest) %>%
+      summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+      group_by(dest) %>%
+      filter(n() == 12)
+    ggplot(aes(x = dest, y = factor(month), fill = delay)) + 
+      geom_tile() +
+      scale_fill_distiller(palette = "Spectral") +
+      labs(x = "Destination", y = "Month", fill = "Arrival Delay")
+      
     ```
 
 
