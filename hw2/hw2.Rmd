@@ -105,7 +105,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 ### Exercise 7.4.1  
 
 1. What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?  
-    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values are allocated to a new category NA. *
+    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values are allocated to a new category NA.*
     ```{r}
     # explore missing values in a histogram
     diamonds3 <- diamonds %>%
@@ -115,9 +115,9 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     
     # explore missing values in a bar chart
     diamonds3 <- diamonds %>%
-      mutate(color = ifelse(color == "I", NA, color))
+      mutate(color = ifelse(color == "I", NA_character_, as.character(color)))
     ggplot(data = diamonds3) +
-      geom_bar(aes(x = as.character(color)))
+      geom_bar(aes(x = color))
     
     ```
 
@@ -239,20 +239,56 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 2. Use `geom_tile()` together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?  
-    *The plot is difficult to interpret because there are too many destinations. One solution is to sort the destinations *
+    *The plot is difficult to interpret because there are too many destinations. One solution is to sort the destinations. I sorted the destinations by descending arrival delay times.*
     ```{r}
+    # initial plot
     flights %>% 
       group_by(month, dest) %>%
       summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
-      group_by(dest) %>%
-      filter(n() == 12)
-    ggplot(aes(x = dest, y = factor(month), fill = delay)) + 
+    ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
+      geom_tile() +
+      labs(x = "Month", y = "Destination", fill = "Arrival Delay")
+    
+    # improved plot
+    flights %>% 
+      group_by(month, dest) %>%
+      summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+      arrange(desc(delay)) %>%
+    ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
       geom_tile() +
       scale_fill_distiller(palette = "Spectral") +
-      labs(x = "Destination", y = "Month", fill = "Arrival Delay")
-      
+      labs(x = "Month", y = "Destination", fill = "Arrival Delay",
+           title = "Sorted by Descending Arrival Times")
     ```
 
+3. Why is it slightly better to use `aes(x = color, y = cut)` rather than `aes(x = cut, y = color)` in the example above?  
+    *It is slightly better to have cut on the y-axis because it is an ordered categorical variable (as opposed to color). In addition, having the smaller numbers on the bottom is intuitively easier to interpret instead of having the smaller numbers on the left side.*
+    ```{r}
+    # example above
+    diamonds %>% 
+      count(color, cut) %>%  
+    ggplot(mapping = aes(x = color, y = cut)) +
+      geom_tile(mapping = aes(fill = n))
+    
+    # using aes(x = cut, y = color)
+    diamonds %>% 
+      count(color, cut) %>%  
+    ggplot(mapping = aes(x = cut, y = color)) +
+      geom_tile(mapping = aes(fill = n))
+    ```
+
+### Exercise 7.5.3.1
+
+1. Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using `cut_width()` vs `cut_number()`? How does that impact a visualisation of the 2d distribution of `carat` and `price`?  
+    *`cut_width()` divides the x variable into bins of specified width. Since each boxplot looks the same by default, using `cut_width()` does not tell you about the number of observations in each boxplot. `cut_number()` will display the proportional amount of points within each bin. When we plot the density graph bin into consideration. Using `cut_number()`, we can see that the graph has a positive skew, indicating that most diamonds are priced in the left range (< $5000).*  
+    ```{r}
+    ggplot(diamonds, aes(x = price, y = ..density.., 
+                         color = cut_width(carat, 0.4))) +
+      geom_freqpoly(binwidth = 500)
+    ggplot(diamonds, aes(x = price, y = ..density.., 
+                         color = cut_number(carat, 15))) +
+      geom_freqpoly(binwidth = 500)
+    ```
 
 
 ## Q2 (optional)
