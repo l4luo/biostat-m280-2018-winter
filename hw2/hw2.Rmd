@@ -134,7 +134,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 
 ### Exercise 7.5.1.1  
 1. Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.  
-    *I used boxplots to compare the departure times of cancelled vs. non-cancelled flights. Cancelled flights should have either missing departure times or arrival times (from chapter 5 of "R For Data Science").*
+    *I used boxplots to compare the departure times of cancelled vs. non-cancelled flights.*
     ```{r}
     flights2 <- flights %>%
       mutate(cancelled = is.na(dep_time))
@@ -280,15 +280,51 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 ### Exercise 7.5.3.1
 
 1. Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using `cut_width()` vs `cut_number()`? How does that impact a visualisation of the 2d distribution of `carat` and `price`?  
-    *`cut_width()` divides the x variable into bins of specified width. Since each boxplot looks the same by default, using `cut_width()` does not tell you about the number of observations in each boxplot. `cut_number()` will display the proportional amount of points within each bin. When we plot the density graph bin into consideration. Using `cut_number()`, we can see that the graph has a positive skew, indicating that most diamonds are priced in the left range (< $5000).*  
+    *`cut_width()` divides the x variable into bins of specified width. Since each boxplot looks the same by default, using `cut_width()` does not tell you about the number of observations in each boxplot. `cut_number()` will display the proportional amount of points within each bin. When we plot the density graph bin into consideration. Using `cut_number()`, we can see that the graph has a positive skew, indicating that most diamonds are priced in the left range (<$5000).*  
     ```{r}
     ggplot(diamonds, aes(x = price, y = ..density.., 
                          color = cut_width(carat, 0.4))) +
-      geom_freqpoly(binwidth = 500)
+      geom_freqpoly(binwidth = 500) +
+      labs(color = "carat")
     ggplot(diamonds, aes(x = price, y = ..density.., 
                          color = cut_number(carat, 15))) +
-      geom_freqpoly(binwidth = 500)
+      geom_freqpoly(binwidth = 500) +
+      labs(color = "carat")
     ```
+
+2. Visualise the distribution of carat, partitioned by price.  
+    **
+    ```{r}
+    ggplot(diamonds) +
+      geom_boxplot(aes(x = cut_number(price, 10), y = carat)) +
+      labs(x = "price", title = "Distribution of Carat by Price") +
+      coord_flip() 
+    
+    # note: solution from https://jrnold.github.io/r4ds-exercise-solutions/
+    # exploratory-data-analysis.html#two-continuous-variables
+
+    ```
+
+3. How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?  
+    *As diamond size increases, so does the average price distribution. In addition, the price distribution of large diamonds is much more spread out than small diamonds. This result is expected, because the the other characteristics (color, clarity, cut) probably play a larger role in the price of larger carat diamonds.*  
+
+4. Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.  
+    *Because cut is a categorical variable, and carat and price are continuous variables, I decided to plot carat and price, faceted by cut.*  
+    ```{r}
+    ggplot(diamonds) +
+      geom_bin2d(aes(x = carat, y = price)) +
+      scale_fill_distiller(palette = "Spectral") +
+      facet_grid(. ~ cut)
+    ```
+
+5. Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.Why is a scatterplot a better display than a binned plot for this case?    
+    ```{r}
+    ggplot(data = diamonds) +
+      geom_point(mapping = aes(x = x, y = y)) +
+      coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
+    ```
+
+    *A scatterplot is a better display for this case because the x and y variables have a strong correlation. When we visualized their histograms separately in Exercise 7.3.4, we saw that their distributions looked almost identical. A scatterplot of the two variables allows us to better visualize unusual combinations, which may not be apparent when examining the variables separately or when we use a binned plot.*
 
 
 ## Q2 (optional)
@@ -298,6 +334,14 @@ Read [Chapter 23](http://r4ds.had.co.nz/model-basics.html) (Model Basics) and [C
 ## Q3
 
 Redo HW1 Q2 using tidyverse.
+
+    ```{r}
+    # import Mendel datasets into R
+    ```
+
+
+1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?  
+
 
 ## Q4 (optional)
 
