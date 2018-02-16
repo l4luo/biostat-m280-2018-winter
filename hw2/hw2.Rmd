@@ -339,14 +339,11 @@ Redo HW1 Q2 using tidyverse.
     # import Mendel datasets into R
     setwd("/home/m280-data/hw1")
     mendel_bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim",
-                           col_names = c("Chromosome", "SNP ID", 
-                                         "Genetic Distance (morgan)", 
-                                         "Base Pair Position (bp)", 
-                                         "Allele 1", "Allele 2"))
+                           col_names = c("chromosome", "SNP", "gene_dist", "BP", 
+                                         "allele_1", "allele_2"))
     mendel_fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", delim = " ",
-                             col_names = c("Family ID", "Person ID", 
-                                           "Father ID", "Mother ID", "Sex", 
-                                           "Affection Status"))
+                             col_names = c("fam_id", "person_id", "father_id", 
+                                           "mother_id", "sex", "affect_stat"))
     ```
 
 
@@ -361,12 +358,19 @@ Redo HW1 Q2 using tidyverse.
     ```
 
 2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?  
-    *The first column lists the chromosomes that this data set contains. The second column lists the number of SNPs for each chromosome.*
+    *The first column lists the chromosomes that this data set contains. The second column lists the number of SNPs for each chromosome.*  
     ```{r}
     mendel_bim %>%
-      count(Chromosome)
+      count(chromosome)
     ```
 
+3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?   
+    *The number of SNPs that are located within the MAP4 gene is:*
+    ```{r}
+    mendel_bim %>% 
+      filter(chromosome == 3 & BP >= 47892180 & BP <= 48130769) %>%
+      count()
+    ```
 
     
 
