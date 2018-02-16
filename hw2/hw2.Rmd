@@ -337,11 +337,29 @@ Redo HW1 Q2 using tidyverse.
 
     ```{r}
     # import Mendel datasets into R
+    setwd("/home/m280-data/hw1")
+    mendel_bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim",
+                           col_names = c("Chromosome", "SNP ID", 
+                                         "Genetic Distance (morgan)", 
+                                         "Base Pair Position (bp)", 
+                                         "Allele 1", "Allele 2"))
+    mendel_fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", delim = " ",
+                             col_names = c("Family ID", "Person ID", 
+                                           "Father ID", "Mother ID", "Sex", 
+                                           "Affection Status"))
     ```
 
 
 1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?  
-
+    *The number of persons in this data set is:*  
+    ```{r}
+    count(mendel_fam)
+    ```
+    *The number of SNPs in this data set is:*  
+    ```{r}
+    count(mendel_bim)
+    ```
+    
 
 ## Q4 (optional)
 
