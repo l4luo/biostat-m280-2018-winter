@@ -365,14 +365,37 @@ Redo HW1 Q2 using tidyverse.
     ```
 
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?   
-    *The number of SNPs that are located within the MAP4 gene is:*
+    *The number of SNPs that are located within the MAP4 gene is:* 
     ```{r}
     mendel_bim %>% 
       filter(chromosome == 3 & BP >= 47892180 & BP <= 48130769) %>%
       count()
     ```
 
-    
+4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.  
+      - Mendel's SNP definition file is similar to the plink `bim` file but has format  
+      `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like  
+    ```{bash, echo=FALSE, eval=FALSE}
+    head mendel_snpdef.txt
+    ```
+
+    ```{r}
+    header <- paste("   2.40 = FILE FORMAT VERSION NUMBER.\n",
+                    "8348674 = NUMBER OF SNPS LISTED HERE.", sep = "")
+    mendel_snpdef <- mendel_bim %>%
+      select(SNP, chromosome, BP) %>%
+      unite(col = X1, sep = ",")
+    write_lines(header, "mendel_snpdef.txt")
+    write_delim(mendel_snpdef, "mendel_snpdef.txt", append = TRUE,
+                col_names = FALSE)
+      
+    ```
+
+    ```{bash}
+    head -10 mendel_snpdef.txt
+    ```
+
+
 
 ## Q4 (optional)
 
