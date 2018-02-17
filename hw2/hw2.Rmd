@@ -8,13 +8,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+sessionInfo()
 ```
 
 ## Q1
 
-Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
-
-    ```{r, echo = FALSE}
+    Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
+    
+    ```{r}
     # load packages and datasets
     if (!"tidyverse" %in% rownames(installed.packages()))  
       install.packages("tidyverse", repos = "http://cran.rstudio.com/")
@@ -26,17 +27,17 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       install.packages("lvplot", repos = "http://cran.rstudio.com/")
     if (!"ggbeeswarm" %in% rownames(installed.packages()))  
       install.packages("ggbeeswarm", repos = "http://cran.rstudio.com/")
-    library(tidyverse)
-    library(nycflights13)
-    library(ggstance)
-    library(lvplot)
-    library(ggbeeswarm)
+    library("tidyverse")
+    library("nycflights13")
+    library("ggstance")
+    library("lvplot")
+    library("ggbeeswarm")
     ```
 
 ### Exercise 7.3.4
 
 1. Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.  
-    *The x variable has minimum value = 0 and maximum value = 10.74. The y variable has range 0 to 58.9. The z variable has range 0 to 31.8. When we look at the histograms of each variable, we can see that the distribution concentrates around 0 to 15, so I removed the outliers to better compare the variables. Thinking about the dimensions of a diamond, I would expect the length and width distributions to be approximately the same, and I would expect the depth to have smaller values in general. Comparing the three histograms as well as the scatterplot, the x and y variables have similar distributions so I would guess that x and y are the length and width, and z is the depth. *   
+    *The x variable has minimum value = 0 and maximum value = 10.74. The y variable has range 0 to 58.9. The z variable has range 0 to 31.8. When we look at the histograms of each variable, we can see that the distribution concentrates around 0 to 15, so I removed the outliers to better compare the variables. Thinking about the dimensions of a diamond, I would expect the length and width distributions to be approximately the same, and I would expect the depth to have smaller values in general. Comparing the three histograms, the x and y variables have similar distributions so I would guess that x and y are the length and width, and z is the depth. In addition, I plotted a scatterplot of y vs. x (in blue) and z vs. x (in pink). The scatterplot shows a strong linear correlation between x and y, and we can see the x and y have very similar values (intercept is approximately 0). Whereas the correlation between x and z is more scattered, and z tends to have smaller values than x. These observations confirm my conclusion.*   
     ```{r}
     # explore range of x, y, and z
     count(diamonds, min(x), max(x))
@@ -48,14 +49,17 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       filter(between(x, 0, 15), between(y, 0, 15), between(z, 0, 15))
     
     ggplot(data = diamonds2) + 
-      geom_histogram(mapping = aes(x = x), binwidth = 0.5)  
+      geom_histogram(mapping = aes(x = x), binwidth = 0.5) +
+      labs(x = "Length (mm)", title = "Distribution of Diamond Length")
     ggplot(data = diamonds2) + 
-      geom_histogram(mapping = aes(x = y), binwidth = 0.5)
+      geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
+      labs(x = "Width (mm)", title = "Distribution of Diamond Width")
     ggplot(data = diamonds2) + 
-      geom_histogram(mapping = aes(x = z), binwidth = 0.5)
+      geom_histogram(mapping = aes(x = z), binwidth = 0.5) + 
+      labs(x = "Depth (mm)", title = "Distribution of Diamond Depth")
     ggplot(data = diamonds2) + 
       geom_point(mapping = aes(x = x, y = y), color = "cadetblue") + 
-      geom_point(mapping = aes(x = x, y = z), color = "lightpink")
+      geom_point(mapping = aes(x = x, y = z), color = "lightpink") 
     ```
 
 2. Explore the distribution of `price`. Do you discover anything unusual or surprising? (Hint: Carefully think about the `binwidth` and make sure you try a wide range of values.)    
@@ -75,7 +79,6 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     diamonds %>%
       filter(price > 1450 & price < 1550) %>%
       count(price)
-    
     ```
 
 3. How many diamonds are 0.99 carat? How many are 1 carat? What do you think is the cause of the difference?  
@@ -95,17 +98,17 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     
     ggplot(data = diamonds) + 
       geom_histogram(mapping = aes(x = x), binwidth = 0.1) +
-      xlim(c(3,5)) +
-      ylim(c(0,4000))
+      xlim(c(3, 5)) +
+      ylim(c(0, 4000))
     ggplot(data = diamonds) + 
       geom_histogram(mapping = aes(x = x), binwidth = 0.1) +
-      coord_cartesian(xlim = c(3,5), ylim = c(0,4000))
+      coord_cartesian(xlim = c(3, 5), ylim = c(0, 4000))
     ```
 
 ### Exercise 7.4.1  
 
 1. What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?  
-    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values are allocated to a new category NA.*
+    *Missing values are removed in a histogram, along with a warning message: "Removed 2 rows containing non-finite values." In a bar chart, missing values are allocated to a new category NA. There is a difference because a bar chart is for categorical variables, so NA values are allocated to a new category. However, since histogram displays continuous data, it would not make sense to have an NA bar.*
     ```{r}
     # explore missing values in a histogram
     diamonds3 <- diamonds %>%
@@ -122,7 +125,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 2. What does `na.rm = TRUE` do in `mean()` and `sum()`?    
-    *The `na.rm = TRUE` removes NA values when carrying out the `mean()` and `sum()` calculations. Otherwise, it will return "NA" if there are NA values in the dataset.*  
+    *The `na.rm = TRUE` removes NA values when carrying out the `mean()` and `sum()` calculations. Otherwise, the functions will return "NA" if there are NA values in the dataset.*  
     ```{r}
     diamonds3 <- diamonds %>%
       mutate(x = ifelse(x > 3 & x < 15, x, NA))
@@ -134,18 +137,18 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 
 ### Exercise 7.5.1.1  
 1. Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.  
-    *I used boxplots to compare the departure times of cancelled vs. non-cancelled flights.*
+    *I used boxplots to compare the scheduled departure times of cancelled vs. non-cancelled flights. The boxplots indicate that cancelled flights have a later scheduled departure time on average.*
     ```{r}
     flights2 <- flights %>%
       mutate(cancelled = is.na(dep_time))
     ggplot(data = flights2) +
-      geom_boxplot(aes(x = cancelled, y = sched_dep_time))
+      geom_boxplot(aes(x = cancelled, y = sched_dep_time)) +
+      labs(x = "Cancelled Flights", y = "Scheduled Depature Time")
     ```
 
 2. What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?  
     *The diamond's carat is most important for predicting the price of a diamond. When we look at the scatterplot, there is a clear positive correlation between carat and price. Looking at the correlation between carat and cut, it appears that diamonds with "fair" cut have the highest carat, while the highest quality cut "ideal" has the lowest carat. This seems counterintuitive, as we would expect better quality diamonds to have higher carat. But the fact that "fair" cut diamonds have a higher carat does help explain the reason why lower quality diamonds are more expensive.*  
     ```{r}
-    
     # explore relationships between price and other variables
     ggplot(data = diamonds) +
       geom_point(aes(x = carat, y = price))
@@ -180,7 +183,8 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     
     # using coord_flip()
     ggplot(data = diamonds) + 
-      geom_boxplot(aes(x = cut, y = carat)) + coord_flip()
+      geom_boxplot(aes(x = cut, y = carat)) + 
+      coord_flip()
     ```
 
 4. One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using `geom_lv()` to display the distribution of price vs cut. What do you learn? How do you interpret the plots?  
@@ -201,7 +205,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       geom_histogram(aes(x = price), binwidth = 500) +
       facet_wrap(~ color)
     ggplot(data = diamonds) +
-      geom_freqpoly(aes(x = price, color = color), binwidth = 500) +
+      geom_freqpoly(aes(x = price, color = color), binwidth = 500) + 
       facet_wrap(~ color)
     ```
 
@@ -219,7 +223,7 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
 ### Exercise 7.5.2.1  
 
 1. How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?  
-    *To more clearly show the distribution of cut within color, I would first separate the data by color and then calculate the proportion of each cut within each color. To show the distribution of color within cut, I would group the data by cut and then calculate the proportions of each color within each cut.*
+    *To more clearly show the distribution of cut within color, I would first separate the data by color and then calculate the proportion of each cut within each color. To show the distribution of color within cut, I would group the data by cut and then calculate the proportions of each color within each cut. Using proportions rather than counts helps with comparison because then each value is scaled proportionally.*
     ```{r}
     diamonds %>% 
       count(color, cut) %>%
@@ -267,14 +271,14 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     # example above
     diamonds %>% 
       count(color, cut) %>%  
-    ggplot(mapping = aes(x = color, y = cut)) +
-      geom_tile(mapping = aes(fill = n))
+    ggplot(aes(x = color, y = cut)) +
+      geom_tile(aes(fill = n))
     
     # using aes(x = cut, y = color)
     diamonds %>% 
       count(color, cut) %>%  
-    ggplot(mapping = aes(x = cut, y = color)) +
-      geom_tile(mapping = aes(fill = n))
+    ggplot(aes(x = cut, y = color)) +
+      geom_tile(aes(fill = n))
     ```
 
 ### Exercise 7.5.3.1
@@ -293,16 +297,12 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     ```
 
 2. Visualise the distribution of carat, partitioned by price.  
-    **
+    *I used horizontal boxplots to visualize the distribution of carat, partitioned by price. As the price increases, the variation in diamond carat also increases. Note: referenced from https://jrnold.github.io/r4ds-exercise-solutions/exploratory-data-analysis.html#two-continuous-variables*
     ```{r}
     ggplot(diamonds) +
       geom_boxplot(aes(x = cut_number(price, 10), y = carat)) +
       labs(x = "price", title = "Distribution of Carat by Price") +
       coord_flip() 
-    
-    # note: solution from https://jrnold.github.io/r4ds-exercise-solutions/
-    # exploratory-data-analysis.html#two-continuous-variables
-
     ```
 
 3. How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?  
