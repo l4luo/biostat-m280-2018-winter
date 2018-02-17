@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
 
-    ```{r}
+    ```{r, echo = FALSE}
     # load packages and datasets
     if (!"tidyverse" %in% rownames(installed.packages()))  
       install.packages("tidyverse", repos = "http://cran.rstudio.com/")
@@ -373,8 +373,7 @@ Redo HW1 Q2 using tidyverse.
     ```
 
 4. Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software <http://www.genetics.ucla.edu/software/mendel>, we have to reformat the data set to be read by Mendel.  
-      - Mendel's SNP definition file is similar to the plink `bim` file but has format  
-      `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like  
+      - Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Use tidyverse to convert `merge-geno.bim` to Mendel SNP definition file. The first few lines of the Mendel SNP definition file should look like  
     ```{bash, echo=FALSE, eval=FALSE}
     head mendel_snpdef.txt
     ```
@@ -394,8 +393,29 @@ Redo HW1 Q2 using tidyverse.
     ```{bash}
     head -10 mendel_snpdef.txt
     ```
+    - Mendel's pedigree file is similar to the plink `fam` file but has format  
+    `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status`  
+    with each field separated by a comma. Use tidyverse to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs. First few lines of the Mendel pedigree should look like  
+    ```{bash, echo=FALSE, eval=FALSE}
+    head -20 mendel_ped.txt
+    ```
 
+    ```{r}
+    mendel_ped <- mendel_fam %>%
+      mutate(person_id = str_sub(person_id, 5, 11), 
+             father_id = if_else(father_id == 0, "", str_sub(father_id, 5, 11)), 
+             mother_id = if_else(mother_id == 0, "", str_sub(mother_id, 5, 11)),
+             sex = if_else(sex == 1, "M,", "F,")) %>%
+      unite(col = X1, c(fam_id, person_id, father_id, mother_id, sex), 
+            sep = ",") %>%
+      select(X1)
+    write_delim(mendel_ped, "mendel_ped.txt", append = FALSE, col_names = FALSE)
+    
+    ```
 
+    ```{bash}
+    head -20 mendel_ped.txt
+    ```
 
 ## Q4 (optional)
 
