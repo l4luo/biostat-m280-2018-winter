@@ -228,17 +228,17 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
       count(color, cut) %>%
       group_by(color) %>%
       mutate(prop = n / sum(n)) %>%
-    ggplot(aes(x = color, y = cut, fill = prop)) +
-      geom_tile() +
-      scale_fill_distiller(palette = "Spectral")
+      ggplot(aes(x = color, y = cut, fill = prop)) +
+        geom_tile() +
+        scale_fill_distiller(palette = "Spectral")
     
     diamonds %>% 
       count(color, cut) %>%
       group_by(cut) %>%
       mutate(prop = n / sum(n)) %>%
-    ggplot(aes(x = color, y = cut, fill = prop)) +
-      geom_tile() +
-      scale_fill_distiller(palette = "Spectral")
+      ggplot(aes(x = color, y = cut, fill = prop)) +
+        geom_tile() +
+        scale_fill_distiller(palette = "Spectral")
     ```
 
 2. Use `geom_tile()` together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?  
@@ -248,20 +248,20 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     flights %>% 
       group_by(month, dest) %>%
       summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
-    ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
-      geom_tile() +
-      labs(x = "Month", y = "Destination", fill = "Arrival Delay")
+      ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
+        geom_tile() +
+        labs(x = "Month", y = "Destination", fill = "Arrival Delay")
     
     # improved plot
     flights %>% 
       group_by(month, dest) %>%
       summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
       arrange(desc(delay)) %>%
-    ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
-      geom_tile() +
-      scale_fill_distiller(palette = "Spectral") +
-      labs(x = "Month", y = "Destination", fill = "Arrival Delay",
-           title = "Sorted by Descending Arrival Times")
+      ggplot(aes(x = factor(month), y = dest, fill = delay)) + 
+        geom_tile() +
+        scale_fill_distiller(palette = "Spectral") +
+        labs(x = "Month", y = "Destination", fill = "Arrival Delay",
+             title = "Sorted by Descending Arrival Times")
     ```
 
 3. Why is it slightly better to use `aes(x = color, y = cut)` rather than `aes(x = cut, y = color)` in the example above?  
@@ -270,14 +270,14 @@ Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Explorat
     # example above
     diamonds %>% 
       count(color, cut) %>%  
-    ggplot(aes(x = color, y = cut)) +
-      geom_tile(aes(fill = n))
+      ggplot(aes(x = color, y = cut)) +
+        geom_tile(aes(fill = n))
     
     # using aes(x = cut, y = color)
     diamonds %>% 
       count(color, cut) %>%  
-    ggplot(aes(x = cut, y = color)) +
-      geom_tile(aes(fill = n))
+      ggplot(aes(x = cut, y = color)) +
+        geom_tile(aes(fill = n))
     ```
 
 ### Exercise 7.5.3.1
