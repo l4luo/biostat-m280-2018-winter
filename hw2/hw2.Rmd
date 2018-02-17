@@ -309,7 +309,7 @@ sessionInfo()
     *As diamond size increases, so does the average price distribution. In addition, the price distribution of large diamonds is much more spread out than small diamonds. This result is expected, because the the other characteristics (color, clarity, cut) probably play a larger role in the price of larger carat diamonds.*  
 
 4. Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.  
-    *Because cut is a categorical variable, and carat and price are continuous variables, I decided to plot carat and price, faceted by cut.*  
+    *Because cut is a categorical variable, and carat and price are continuous variables, I decided to plot carat and price, faceted by cut. I used `geom_bin2d`, which divides the coordinate plane into 2d bins. The fill color displays how many points fall into each bin.*  
     ```{r}
     ggplot(diamonds) +
       geom_bin2d(aes(x = carat, y = price)) +
@@ -317,14 +317,13 @@ sessionInfo()
       facet_grid(. ~ cut)
     ```
 
-5. Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.Why is a scatterplot a better display than a binned plot for this case?    
+5. Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately. Why is a scatterplot a better display than a binned plot for this case?  
+    *A scatterplot is a better display for this case because the x and y variables have a strong correlation. When we visualized their histograms separately in Exercise 7.3.4, we saw that their distributions looked almost identical. A scatterplot of the two variables allows us to better visualize unusual combinations, which may not be apparent when examining the variables separately or when we use a binned plot.*  
     ```{r}
     ggplot(data = diamonds) +
       geom_point(mapping = aes(x = x, y = y)) +
       coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
     ```
-
-    *A scatterplot is a better display for this case because the x and y variables have a strong correlation. When we visualized their histograms separately in Exercise 7.3.4, we saw that their distributions looked almost identical. A scatterplot of the two variables allows us to better visualize unusual combinations, which may not be apparent when examining the variables separately or when we use a binned plot.*
 
 
 ## Q2 (optional)
