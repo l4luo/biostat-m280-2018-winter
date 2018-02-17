@@ -6,15 +6,18 @@ date: "2/12/2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-sessionInfo()
+knitr::opts_chunk$set(eval = TRUE)
 ```
 
 ## Q1
 
-    Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
-    
+Read [Chapter 7](http://r4ds.had.co.nz/exploratory-data-analysis.html) (Exploratory Data Analysis) of _R for Data Science_ and do exercises 7.3.4, 7.4.1, 7.5.1.1, 7.5.2.1, and 7.5.3.1.  
+
+### Exercise 7.3.4
+
+1. Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.  
     ```{r}
     # load packages and datasets
     if (!"tidyverse" %in% rownames(installed.packages()))  
@@ -27,16 +30,12 @@ sessionInfo()
       install.packages("lvplot", repos = "http://cran.rstudio.com/")
     if (!"ggbeeswarm" %in% rownames(installed.packages()))  
       install.packages("ggbeeswarm", repos = "http://cran.rstudio.com/")
-    library("tidyverse")
-    library("nycflights13")
-    library("ggstance")
-    library("lvplot")
-    library("ggbeeswarm")
+    suppressMessages(library(tidyverse))
+    suppressMessages(library(nycflights13))
+    suppressMessages(library(ggstance))
+    suppressMessages(library(lvplot))
+    suppressMessages(library(ggbeeswarm))
     ```
-
-### Exercise 7.3.4
-
-1. Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.  
     *The x variable has minimum value = 0 and maximum value = 10.74. The y variable has range 0 to 58.9. The z variable has range 0 to 31.8. When we look at the histograms of each variable, we can see that the distribution concentrates around 0 to 15, so I removed the outliers to better compare the variables. Thinking about the dimensions of a diamond, I would expect the length and width distributions to be approximately the same, and I would expect the depth to have smaller values in general. Comparing the three histograms, the x and y variables have similar distributions so I would guess that x and y are the length and width, and z is the depth. In addition, I plotted a scatterplot of y vs. x (in blue) and z vs. x (in pink). The scatterplot shows a strong linear correlation between x and y, and we can see the x and y have very similar values (intercept is approximately 0). Whereas the correlation between x and z is more scattered, and z tends to have smaller values than x. These observations confirm my conclusion.*   
     ```{r}
     # explore range of x, y, and z
@@ -331,9 +330,9 @@ sessionInfo()
 Read [Chapter 23](http://r4ds.had.co.nz/model-basics.html) (Model Basics) and [Chapter 24](http://r4ds.had.co.nz/model-building.html) (Model Building) of _R for Data Science_ and do exercises 24.2.3 and 24.3.5.
 
 ## Q3
-
 Redo HW1 Q2 using tidyverse.  
 
+1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?    
     ```{r}
     # import Mendel datasets into R
     setwd("/home/m280-data/hw1")
@@ -345,8 +344,6 @@ Redo HW1 Q2 using tidyverse.
                                            "mother_id", "sex", "affect_stat"))
     ```
 
-
-1. How many persons are in the data set (statisticians call this `n`)? How many SNPs are in the data set (statisticians call this `p`)?    
     *The number of persons in this data set is:*  
     ```{r}
     count(mendel_fam)
@@ -376,7 +373,7 @@ Redo HW1 Q2 using tidyverse.
     ```{bash, echo=FALSE, eval=FALSE}
     head mendel_snpdef.txt
     ```
-
+     - *I reformatted the plink `merge-geno.bim` data set to be readable by Mendel software using tidyverse, and then I piped the output to a new text file `mendel_snpdef.txt`.*
     ```{r}
     header <- paste("   2.40 = FILE FORMAT VERSION NUMBER.\n",
                     "8348674 = NUMBER OF SNPS LISTED HERE.", sep = "")
@@ -386,7 +383,6 @@ Redo HW1 Q2 using tidyverse.
     write_lines(header, "mendel_snpdef.txt")
     write_delim(mendel_snpdef, "mendel_snpdef.txt", append = TRUE,
                 col_names = FALSE)
-      
     ```
 
     ```{bash}
@@ -398,7 +394,7 @@ Redo HW1 Q2 using tidyverse.
     ```{bash, echo=FALSE, eval=FALSE}
     head -20 mendel_ped.txt
     ```
-
+    - *I converted the plink `merge-geno.fam` file to Mendel pedigree format using tidyverse, and then I piped the output to a text file `mendel_ped.txt`.*
     ```{r}
     mendel_ped <- mendel_fam %>%
       mutate(person_id = str_sub(person_id, 5, 11), 
@@ -409,7 +405,6 @@ Redo HW1 Q2 using tidyverse.
             sep = ",") %>%
       select(X1)
     write_delim(mendel_ped, "mendel_ped.txt", append = FALSE, col_names = FALSE)
-    
     ```
 
     ```{bash}
