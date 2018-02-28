@@ -54,6 +54,8 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     db <- dbConnect(RSQLite::SQLite(), dbname = 
                     "/home/m280-data/la_parking/LA_Parking_Citations_Extra.sqlite")
     dbListTables(db)
+    latix_sql <- dplyr::tbl(db, "latix")
+    latix_sql %>% print(width = Inf)
     #res <- dbSendQuery(db, "SELECT * FROM latix")
     #dbFetch(res)
     #dbDisconect(db)
@@ -62,9 +64,6 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
 
     ```{r}
-    latix_sql <- dplyr::tbl(db, "latix")
-    latix_sql %>% print(width = Inf)
-    
     latix_sql %>%
       summarise(n_distinct(Ticket_number))
     
@@ -90,28 +89,60 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     ```
 
     ```{r}
-    test <- latix_sql %>%
+    first <- latix_sql %>%
       filter(!is.na(Issue_Year)) %>%
       select(Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute) %>%
       arrange(Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute)
-    head(test, 1) 
+    head(first, 1) 
       
-    test2 <- latix_sql %>%
+    last <- latix_sql %>%
       filter(!is.na(Issue_Year)) %>%
       select(Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute) %>%
       arrange(desc(Issue_Year), desc(Issue_Month), desc(Issue_Day), 
               desc(Issue_Hour), desc(Issue_Minute))
-    head(test2, 1)   
+    head(last, 1)   
 
-    #filter(row_number()==1 | row_number()==n()) %>%
+    #filter(row_number()==1 | row_number()==n())
+    
+    ```
+
+    ```{r}
+    # which years have most data?
+    latix_sql %>%
+      filter(!is.na(Issue_Year)) %>%
+      group_by(Issue_Year) %>%
+      count() %>%
+      collect() %>%
+      ggplot() + 
+        geom_col(aes(x = Issue_Year, y = n)) 
+    #dbDisconnect(db)
+    ```
+
+
+0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+
+    ```{r}
     
     ```
 
 
 
-0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
-
 0. Which car makes received most citations?
+
+    ```{r}
+    latix_sql %>%
+      filter(!is.na(Make)) %>%
+      group_by(Make) %>%
+      summarise(num = n()) %>%
+      arrange(desc(num)) %>%
+      collect() %>%
+      top_n(5) %>%
+      ggplot() +
+        geom_col(aes(x = Make, y = num))
+      
+    ```
+
+
 
 0. How many different colors of cars were ticketed? Which color attracted most tickets?
 
