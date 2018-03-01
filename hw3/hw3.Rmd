@@ -38,14 +38,14 @@ The `/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv` file on teaching s
     if (!"RSQLite" %in% rownames(installed.packages()))  
       install.packages("RSQLite", repos = "http://cran.rstudio.com/")
     if (!"dbplyr" %in% rownames(installed.packages()))  
-      install.packages("dbplyr", repos = "http://cran.rstudio.com/")  
-    if (!"lubridate" %in% rownames(installed.packages()))  
-      install.packages("lubridate", repos = "http://cran.rstudio.com/")     
+      install.packages("dbplyr", repos = "http://cran.rstudio.com/") 
+    if (!"knitr" %in% rownames(installed.packages()))  
+      install.packages("knitr", repos = "http://cran.rstudio.com/") 
     suppressMessages(library(tidyverse))
     suppressMessages(library(DBI))
     suppressMessages(library(RSQLite))
     suppressMessages(library(dbplyr))
-    suppressMessages(library(lubridate))
+    suppressMessages(library(knitr))
     ```
 
 The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on teaching server contains information about parking tickets in LA City. It was downloaded from [LA Open Data Portal](https://data.lacity.org/A-Well-Run-City/Parking-Citations/wjz9-h9np). Connect to the database and answer following questions using plots and summary statistics. In this exercise, you are **not** allowed to load whole data into memory. Use the _transform in database, plot in R_ strategy.
@@ -75,19 +75,6 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
     SELECT COUNT(Ticket_number) FROM latix
     ```
 
-    ```{r, eval = FALSE}
-    # using lubridate...does not work
-    latix_sql %>% 
-      select(Issue_Year, Issue_Month, Issue_Day, Issue_Hour, Issue_Minute) %>% 
-      mutate(Issue_Time = make_datetime(Issue_Year, Issue_Month, Issue_Day, Issue_Hour, 
-                                       Issue_Minute))
-    
-    test <- latix_sql %>% 
-      select(Issue_Year, Issue_Month, Issue_Day) %>%
-      mutate(Date = ymd(paste(Issue_Year, "-", Issue_Month, "-", Issue_Day, sep="")))
-    head(test)
-    ```
-
     ```{r}
     first <- latix_sql %>%
       filter(!is.na(Issue_Year)) %>%
@@ -114,18 +101,56 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       count() %>%
       collect() %>%
       ggplot() + 
-        geom_col(aes(x = Issue_Year, y = n)) 
-    #dbDisconnect(db)
+        geom_col(aes(x = Issue_Year, y = n)) +
+        scale_x_continuous("Issue Year", breaks = c(2010, 2011, 2012, 2013, 
+                                                    2014, 2015, 2016, 2017))
     ```
 
 
 0. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
 
     ```{r}
+    latix_sql %>%
+      filter(!is.na(Issue_Hour)) %>%
+      group_by(Issue_Hour) %>%
+      summarise(num = n()) %>%
+      collect() %>%
+      ggplot() +
+        geom_col(aes(x = Issue_Hour, y = num)) 
+
+    latix_sql %>%
+      filter(!is.na(Issue_Wday)) %>%
+      group_by(Issue_Wday) %>%
+      summarise(num = n()) %>%
+      collect() %>%
+      ggplot() +
+        geom_col(aes(x = Issue_Wday, y = num)) +
+        scale_x_continuous("Issue Weekday", 
+                           breaks = c(1, 2, 3, 4, 5, 6, 7),
+                           label = c("Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", 
+                                     "Sat"))
+    latix_sql %>%
+      filter(!is.na(Issue_Day)) %>%
+      group_by(Issue_Day) %>%
+      summarise(num = n()) %>%
+      collect() %>%
+      ggplot() +
+        geom_col(aes(x = Issue_Day, y = num)) +
+        scale_x_continuous("Issue Month Day", breaks = c(1, 5, 10, 15, 20, 25, 30))
     
+    latix_sql %>%
+      filter(!is.na(Issue_Month)) %>%
+      group_by(Issue_Month) %>%
+      summarise(num = n()) %>%
+      collect() %>%
+      ggplot() +
+        geom_col(aes(x = Issue_Month, y = num)) + 
+        scale_x_continuous("Issue Month", 
+                           breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+                           label = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
     ```
-
-
 
 0. Which car makes received most citations?
 
@@ -142,12 +167,37 @@ The SQLite database `/home/m280-data/la_parking/LA_Parking_Citations.sqlite` on 
       
     ```
 
-
-
 0. How many different colors of cars were ticketed? Which color attracted most tickets?
+    ```{r}
+    latix_sql %>%
+      summarise(n_distinct(Color))
+    
+    latix_sql %>%
+      filter(!is.na(Color)) %>%
+      count(Color) %>%
+      arrange(desc(n)) %>%
+      collect() %>%
+      top_n(1)
+      
+    ```
+
 
 0. What are the most common ticket types?
+    ```{r}
+    latix_sql %>%
+      filter(!is.na(Violation_Description)) %>%
+      group_by(Violation_Description) %>%
+      summarise(num = n()) %>%
+      arrange(desc(num)) %>%
+      collect() %>%
+      top_n(5) %>%
+      kable()
+    ```
 
 0. How much money was collected on parking tickets in 2015 and 2016?
+    ```{r}
+    
+    ```
+
 
 0. Visualize any other information you are interested in.
