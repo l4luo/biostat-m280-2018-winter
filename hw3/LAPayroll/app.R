@@ -57,7 +57,7 @@ ui <- fluidPage(
                    selected = "Median")
     ),
     mainPanel(
-      tableOutput(outputId = "deptEarnTable")
+      plotOutput(outputId = "deptEarnPlot")
     )
   ),
   
@@ -66,8 +66,8 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "nDeptCost",
-                   label = "Choose number of departments to display:",
-                   min = 0, max = 30, value = 5), 
+                  label = "Choose number of departments to display:",
+                  min = 0, max = 30, value = 5), 
       selectInput(inputId = "yrQ5",
                   label = "Choose year:",
                   choices = c("2013", "2014", "2015", "2016", "2017"),
@@ -103,31 +103,38 @@ server <- function(input, output) {
     dataInput()
   })
   
-  # Render Table for Q4 ----
+  # Render Plot for Q4 ----
   dataInput2 <- reactive({
     if(input$method == "Mean") {
-      LApayroll %>%
+      a <- LApayroll %>%
         filter(yr == input$yrQ4) %>%
         group_by(dept) %>%
-        summarise(meanTotal = mean(total), meanBase = mean(base),
-                  meanOver = mean(overtime), meanOther = mean(other)) %>%
-        arrange(desc(meanTotal)) %>%
-        select(dept, meanTotal, meanBase, meanOver, meanOther) %>% 
-        gather(meanTotal, meanBase, meanOver, meanOther, key = "type", value = "amount") %>%
-        head(input$nDeptEarn)
+        summarise(Total = mean(total, na.rm = TRUE), 
+                  Base = mean(base, na.rm = TRUE),
+                  Over = mean(overtime, na.rm = TRUE), 
+                  Other = mean(other, na.rm = TRUE))
     } else {
-      LApayroll %>%
+      a <- LApayroll %>%
         filter(yr == input$yrQ4) %>%
         group_by(dept) %>%
-        summarise(medTotal = median(total), medBase = median(base),
-                  medOver= median(overtime), medOther = median(other)) %>%
-        arrange(desc(medTotal)) %>%
-        select(dept, medTotal, medBase, medOver, medOther) %>%
-        head(input$nDeptEarn)
+        summarise(Total = median(total, na.rm = TRUE), 
+                  Base = median(base, na.rm = TRUE),
+                  Over= median(overtime, na.rm = TRUE), 
+                  Other = median(other, na.rm = TRUE)) 
     }
+    arrange(a, desc(Total)) %>%
+      head(input$nDeptEarn) %>%
+      gather(Base, Over, Other, key = "type", value = "amount") 
+      
   })
-  output$deptEarnTable <- renderTable({
-    dataInput2() 
+  output$deptEarnPlot <- renderPlot({
+    dataInput2() %>%
+      ggplot() +
+        geom_col(aes(x = dept, y = amount, fill = type), position = "dodge") +
+        scale_y_continuous(labels = scales::dollar_format("$")) +
+        labs(x = "Department", y = "Mean/Median Pay") +
+        coord_flip()
+      
   })
   
   # Render Table for Q5 ----
@@ -135,8 +142,10 @@ server <- function(input, output) {
     LApayroll %>%
       filter(yr == input$yrQ5) %>%
       group_by(dept) %>%
-      summarise(sumTotal = sum(total), sumBase = sum(base), 
-                sumOver = sum(overtime), sumOther = sum(other), 
+      summarise(sumTotal = sum(total), 
+                sumBase = sum(base), 
+                sumOver = sum(overtime), 
+                sumOther = sum(other), 
                 sumCost = sum(cost)) %>%
       arrange(desc(sumCost)) %>%
       select(dept, sumCost, sumTotal, sumBase, sumOver, sumOther) %>%
