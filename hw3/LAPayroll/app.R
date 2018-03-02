@@ -36,7 +36,7 @@ ui <- fluidPage(
                   selected = "2017")
     ),
     mainPanel(
-      tableOutput(outputId = "employeePlot")
+      tableOutput(outputId = "employeeTable")
     )
   ),  
   
@@ -57,11 +57,11 @@ ui <- fluidPage(
                    selected = "Median")
     ),
     mainPanel(
-      tableOutput(outputId = "deptEarnPlot")
+      tableOutput(outputId = "deptEarnTable")
     )
   ),
   
-  # Output: Histogram for Q5 ----  
+  # Q5: Most Expensive Departments ----
   titlePanel("Which Departments Cost the Most?"), 
   sidebarLayout(
     sidebarPanel(
@@ -74,7 +74,7 @@ ui <- fluidPage(
                   selected = "2017")
     ),
     mainPanel(
-      plotOutput(outputId = "deptCostPlot")
+      tableOutput(outputId = "deptCostTable")
     )
   )
 
@@ -83,6 +83,7 @@ ui <- fluidPage(
 # Server logic ----
 server <- function(input, output) {
   
+  # Render Plot for Q2 ----
   output$payrollPlot <- renderPlot({
     ggplot(pay) +
       geom_col(aes(x = yr, y = amount, fill = type)) +
@@ -90,18 +91,60 @@ server <- function(input, output) {
       labs(x = "Year", y = "Total Pay")
   })
   
-  # Display Table for Q3
+  # Render Table for Q3 ----
   dataInput <- reactive({
     LApayroll %>%
-      select(yr, job, dept, total, base, overtime, other) %>%
       filter(yr == input$yrQ3) %>%
       arrange(desc(total)) %>%
+      select(job, dept, total, base, overtime, other) %>%
       head(input$nEmployee)
   })
-  output$employeePlot <- renderTable({
+  output$employeeTable <- renderTable({
     dataInput()
   })
   
+  # Render Table for Q4 ----
+  dataInput2 <- reactive({
+    if(input$method == "Mean") {
+      LApayroll %>%
+        filter(yr == input$yrQ4) %>%
+        group_by(dept) %>%
+        summarise(meanTotal = mean(total), meanBase = mean(base),
+                  meanOver = mean(overtime), meanOther = mean(other)) %>%
+        arrange(desc(meanTotal)) %>%
+        select(dept, meanTotal, meanBase, meanOver, meanOther) %>% 
+        gather(meanTotal, meanBase, meanOver, meanOther, key = "type", value = "amount") %>%
+        head(input$nDeptEarn)
+    } else {
+      LApayroll %>%
+        filter(yr == input$yrQ4) %>%
+        group_by(dept) %>%
+        summarise(medTotal = median(total), medBase = median(base),
+                  medOver= median(overtime), medOther = median(other)) %>%
+        arrange(desc(medTotal)) %>%
+        select(dept, medTotal, medBase, medOver, medOther) %>%
+        head(input$nDeptEarn)
+    }
+  })
+  output$deptEarnTable <- renderTable({
+    dataInput2() 
+  })
+  
+  # Render Table for Q5 ----
+  dataInput3 <- reactive({
+    LApayroll %>%
+      filter(yr == input$yrQ5) %>%
+      group_by(dept) %>%
+      summarise(sumTotal = sum(total), sumBase = sum(base), 
+                sumOver = sum(overtime), sumOther = sum(other), 
+                sumCost = sum(cost)) %>%
+      arrange(desc(sumCost)) %>%
+      select(dept, sumCost, sumTotal, sumBase, sumOver, sumOther) %>%
+      head(input$nDeptCost)
+  })
+  output$deptCostTable <- renderTable({
+    dataInput3()
+  })
   
 }
 
