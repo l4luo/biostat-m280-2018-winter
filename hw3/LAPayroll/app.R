@@ -1,21 +1,25 @@
 setwd(".")
 
 # Load packages ----
-library(shiny)
-library(tidyverse)
+if (!require("pacman"))  
+  install.packages("pacman", repos = "http://cran.us.r-project.org/")
+p_load("tidyverse", "shiny")
 
 # Load data ----
-LApayroll <- read_rds("payroll.rds")
+LApayroll <- read_rds("payroll.rds") %>%
+  mutate(job = str_wrap(job, width = 30),
+         dept = str_wrap(dept, width = 30))
 
 # Create dataset for Q2 ----
 pay <- LApayroll %>%
   select(yr, base, overtime, other) %>%
   group_by(yr) %>%
-  summarise(sumBase = sum(base, na.rm = TRUE),
-            sumOver = sum(overtime, na.rm = TRUE),
-            sumOther = sum(other, na.rm = TRUE)) %>%
-  gather(sumBase, sumOver, sumOther, key = "type", value = "amount")
-
+  summarise(`Base Pay` = sum(base, na.rm = TRUE),
+            `Overtime Pay` = sum(overtime, na.rm = TRUE),
+            `Other Pay` = sum(other, na.rm = TRUE)) %>%
+  gather(`Base Pay`, `Overtime Pay`, `Other Pay`, 
+         key = "type", value = "amount")
+  
 # User interface ----
 ui <- fluidPage(
   
@@ -86,9 +90,12 @@ server <- function(input, output) {
   # Render Plot for Q2 ----
   output$payrollPlot <- renderPlot({
     ggplot(pay) +
-      geom_col(aes(x = yr, y = amount, fill = type)) +
+      geom_col(aes(x = yr, y = amount, 
+                   fill = factor(type, levels = c("Other Pay", 
+                                                  "Overtime Pay", 
+                                                  "Base Pay")))) +
       scale_y_continuous(labels = scales::dollar_format("$")) +
-      labs(x = "Year", y = "Total Pay")
+      labs(x = "Year", y = "Total Pay", fill = "Type")
   })
   
   # Render Table for Q3 ----
