@@ -1,9 +1,8 @@
 setwd(".")
 
 # Load packages ----
-if (!require("pacman"))  
-  install.packages("pacman", repos = "http://cran.us.r-project.org/")
-p_load("tidyverse", "shiny")
+library(shiny)
+library(tidyverse)
 
 # Load data ----
 LApayroll <- read_rds("payroll.rds") %>%
@@ -33,7 +32,7 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput(inputId = "nEmployee",
                   label = "Choose number of employees to display:",
-                  min = 0, max = 30, value = 10), 
+                  min = 0, max = 20, value = 10), 
       selectInput(inputId = "yrQ3",
                   label = "Choose year:",
                   choices = c("2013", "2014", "2015", "2016", "2017"),
@@ -50,7 +49,7 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput(inputId = "nDeptEarn",
                   label = "Choose number of departments to display:",
-                  min = 0, max = 30, value = 5), 
+                  min = 0, max = 15, value = 5), 
       selectInput(inputId = "yrQ4",
                   label = "Choose year:",
                   choices = c("2013", "2014", "2015", "2016", "2017"),
@@ -71,7 +70,7 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput(inputId = "nDeptCost",
                   label = "Choose number of departments to display:",
-                  min = 0, max = 30, value = 5), 
+                  min = 0, max = 20, value = 5), 
       selectInput(inputId = "yrQ5",
                   label = "Choose year:",
                   choices = c("2013", "2014", "2015", "2016", "2017"),
@@ -79,6 +78,23 @@ ui <- fluidPage(
     ),
     mainPanel(
       tableOutput(outputId = "deptCostTable")
+    )
+  ), 
+  
+  # Q6: Highest-Paying Overtime Employees ----
+  titlePanel("Who Had the Highest Overtime Pay?"), 
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput(inputId = "nEmp",
+                  label = "Choose number of employees to display:",
+                  min = 0, max = 20, value = 10), 
+      selectInput(inputId = "yrQ6",
+                  label = "Choose year:",
+                  choices = c("2013", "2014", "2015", "2016", "2017"),
+                  selected = "2017")
+    ),
+    mainPanel(
+      tableOutput(outputId = "employeeTable2")
     )
   )
 
@@ -93,9 +109,11 @@ server <- function(input, output) {
       geom_col(aes(x = yr, y = amount, 
                    fill = factor(type, levels = c("Other Pay", 
                                                   "Overtime Pay", 
-                                                  "Base Pay")))) +
+                                                  "Base Pay"))), 
+               color = "Black") +
       scale_y_continuous(labels = scales::dollar_format("$")) +
-      labs(x = "Year", y = "Total Pay", fill = "Type")
+      labs(x = "Year", y = "Total Pay", fill = "Type") +
+      scale_fill_brewer(palette = "Pastel2")
   })
   
   # Render Table for Q3 ----
@@ -103,7 +121,9 @@ server <- function(input, output) {
     LApayroll %>%
       filter(yr == input$yrQ3) %>%
       arrange(desc(total)) %>%
-      select(job, dept, total, base, overtime, other) %>%
+      select("Job Title" = job, "Department" = dept, "Total Pay ($)" = total, 
+             "Base ($)" = base, "Overtime ($)" = overtime, 
+             "Other ($)" = other) %>%
       head(input$nEmployee)
   })
   output$employeeTable <- renderTable({
@@ -131,15 +151,17 @@ server <- function(input, output) {
     }
     arrange(a, desc(Total)) %>%
       head(input$nDeptEarn) %>%
-      gather(Base, Over, Other, key = "type", value = "amount") 
+      gather(Base, Over, Other, key = "Type", value = "amount") 
       
   })
   output$deptEarnPlot <- renderPlot({
     dataInput2() %>%
       ggplot() +
-        geom_col(aes(x = dept, y = amount, fill = type), position = "dodge") +
+        geom_col(aes(x = dept, y = amount, fill = Type), position = "dodge",
+                 colour = "Black") +
         scale_y_continuous(labels = scales::dollar_format("$")) +
         labs(x = "Department", y = "Mean/Median Pay") +
+        scale_fill_brewer(palette = "Pastel1") +
         coord_flip()
       
   })
@@ -160,6 +182,18 @@ server <- function(input, output) {
   })
   output$deptCostTable <- renderTable({
     dataInput3()
+  })
+  
+  # Render Table for Q6 ----
+  dataInput4 <- reactive({
+    LApayroll %>%
+      filter(yr == input$yrQ6) %>%
+      arrange(desc(overtime)) %>%
+      select("Job Title" = job, "Overtime ($)" = overtime) %>%
+      head(input$nEmp)
+  })
+  output$employeeTable2 <- renderTable({
+    dataInput4()
   })
   
 }
