@@ -47,7 +47,7 @@ ui <- fluidPage(
     )
   ),  
   
-  #Q4: Top-Earning Departments ----
+  # Q4: Top-Earning Departments ----
   titlePanel("Which Departments Earn Most?"), 
   p("The mean or median payroll of of the top n earning departments in a 
     specific year."),
@@ -96,7 +96,7 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput(inputId = "nEmp",
                   label = "Choose number of employees to display:",
-                  min = 0, max = 20, value = 10), 
+                  min = 0, max = 20, value = 5), 
       selectInput(inputId = "yrQ6",
                   label = "Choose year:",
                   choices = c("2013", "2014", "2015", "2016", "2017"),
@@ -130,8 +130,11 @@ server <- function(input, output) {
     LApayroll %>%
       filter(yr == input$yrQ3) %>%
       arrange(desc(total)) %>%
-      select("Job Title" = job, "Department" = dept, "Total Pay ($)" = total, 
-             "Base ($)" = base, "Overtime ($)" = overtime, 
+      select("Job Title" = job, 
+             "Department" = dept, 
+             "Total Pay ($)" = total, 
+             "Base ($)" = base, 
+             "Overtime ($)" = overtime, 
              "Other ($)" = other) %>%
       head(input$nEmployee)
   })
@@ -166,7 +169,8 @@ server <- function(input, output) {
   output$deptEarnPlot <- renderPlot({
     dataInput2() %>%
       ggplot() +
-        geom_col(aes(x = dept, y = amount, fill = Type), position = "dodge",
+        geom_col(aes(x = dept, y = amount, fill = Type), 
+                 position = "dodge",
                  colour = "Black") +
         scale_y_continuous(labels = scales::dollar_format("$")) +
         labs(x = "Department", y = "Mean/Median Pay") +
@@ -193,8 +197,9 @@ server <- function(input, output) {
   output$deptCostPlot <- renderPlot({
     dataInput3() %>%
       ggplot() +
-        geom_col(aes(x = dept, y = amount, fill = Type), position = "dodge",
-               colour = "Black") +
+        geom_col(aes(x = dept, y = amount, fill = Type), 
+                 position = "dodge",
+                 colour = "Black") +
         scale_y_continuous(labels = scales::dollar_format("$")) +
         labs(x = "Department", y = "Sum by Pay Type") +
         scale_fill_brewer(palette = "Set3") +
