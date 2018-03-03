@@ -24,10 +24,14 @@ ui <- fluidPage(
   
   # Q2: Total Payroll by LA City ----
   titlePanel("Total LA City Payroll By Year"),
+  p("The total LA City payroll of each year, broken down into base pay,
+    overtime pay, and other pay."),
   plotOutput(outputId = "payrollPlot"),
   
   # Q3: Highest Earning Employees ----
   titlePanel("Who Earned Most?"), 
+  p("The payroll information of the top n highest paid LA City employees
+    in a specific year."),
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "nEmployee",
@@ -45,6 +49,8 @@ ui <- fluidPage(
   
   #Q4: Top-Earning Departments ----
   titlePanel("Which Departments Earn Most?"), 
+  p("The mean or median payroll of of the top n earning departments in a 
+    specific year."),
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "nDeptEarn",
@@ -66,6 +72,8 @@ ui <- fluidPage(
   
   # Q5: Most Expensive Departments ----
   titlePanel("Which Departments Cost the Most?"), 
+  p("The payroll information of the top n expensive departments in a specific
+    year."),
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "nDeptCost",
@@ -77,12 +85,13 @@ ui <- fluidPage(
                   selected = "2017")
     ),
     mainPanel(
-      tableOutput(outputId = "deptCostTable")
+      plotOutput(outputId = "deptCostPlot")
     )
   ), 
   
   # Q6: Highest-Paying Overtime Employees ----
   titlePanel("Who Had the Highest Overtime Pay?"), 
+  p("The employees with the highest overtime pay, broken down by year."),
   sidebarLayout(
     sidebarPanel(
       sliderInput(inputId = "nEmp",
@@ -172,16 +181,24 @@ server <- function(input, output) {
       filter(yr == input$yrQ5) %>%
       group_by(dept) %>%
       summarise(sumTotal = sum(total), 
-                sumBase = sum(base), 
-                sumOver = sum(overtime), 
-                sumOther = sum(other), 
+                `Base Pay` = sum(base), 
+                `Overtime Pay` = sum(overtime), 
+                `Other Pay` = sum(other), 
                 sumCost = sum(cost)) %>%
       arrange(desc(sumCost)) %>%
-      select(dept, sumCost, sumTotal, sumBase, sumOver, sumOther) %>%
-      head(input$nDeptCost)
+      head(input$nDeptCost) %>%
+      gather(`Base Pay`, `Overtime Pay`, `Other Pay`, 
+             key = "Type", value = "amount")
   })
-  output$deptCostTable <- renderTable({
-    dataInput3()
+  output$deptCostPlot <- renderPlot({
+    dataInput3() %>%
+      ggplot() +
+        geom_col(aes(x = dept, y = amount, fill = Type), position = "dodge",
+               colour = "Black") +
+        scale_y_continuous(labels = scales::dollar_format("$")) +
+        labs(x = "Department", y = "Sum by Pay Type") +
+        scale_fill_brewer(palette = "Set3") +
+        coord_flip()
   })
   
   # Render Table for Q6 ----
@@ -189,7 +206,7 @@ server <- function(input, output) {
     LApayroll %>%
       filter(yr == input$yrQ6) %>%
       arrange(desc(overtime)) %>%
-      select("Job Title" = job, "Overtime ($)" = overtime) %>%
+      select("Job Title" = job, "Overtime Pay ($)" = overtime) %>%
       head(input$nEmp)
   })
   output$employeeTable2 <- renderTable({
