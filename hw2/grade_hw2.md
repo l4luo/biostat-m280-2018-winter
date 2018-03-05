@@ -1,12 +1,12 @@
 *Landi Luo*
 
-### Overall Grade: 100/100
+### Overall Grade: 99/100
 
-### Quality of report: 10/10
+### Quality of report: 9/10
 
--   Is the homework submitted (git tag time) before deadline?
+-   Is the homework submitted (git tag time) before deadline? (-1 pt)
 
-    Yes. `Feb 16, 2018, 11:30 PM PST`.
+    Yes, `Feb 16, 2018, 11:30 PM PST`. But the tag name should be `hw2` not `v2.1`.
 
 -   Is the final report in a human readable format html?
 
