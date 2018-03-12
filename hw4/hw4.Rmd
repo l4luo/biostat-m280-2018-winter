@@ -16,28 +16,28 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, message = FALSE}
 if (!require("pacman"))  
   install.packages("pacman", repos = "http://cran.us.r-project.org/")
-p_load("sparklyr", "dplyr", "ggplot2", "ggmap", "maps", "mapdata")
+p_load("sparklyr", "tidyverse", "ggmap", "maps", "mapdata", "knitr")
 ```
 
 Our Apache Yarn cluster hosts the [flights](http://stat-computing.org/dataexpo/2009/the-data.html) data representing 123 million flights over 22 years. Read the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) on how to access the Yarn cluster. Connect to the database using `sparklyr` and answer following questions. You can base your answers on a specific year or the whole data set.  
 
-    ```{r}
-    # connect to spark
-    Sys.setenv(SPARK_HOME="/usr/lib/spark")
-    config <- spark_config()
-    sc <- spark_connect(master = "local", config = config)
-    sc
-    ```
-    *Create dplyr reference to the Spark DataFrame.*   
-    ```{r}
-    flights_tbl <- tbl(sc, 'flights')
-    airlines_tbl <- tbl(sc, 'airlines')
-    airports_tbl <- tbl(sc, 'airports')
+```{r, results="hide"}
+# connect to spark
+Sys.setenv(SPARK_HOME="/usr/lib/spark")
+config <- spark_config()
+sc <- spark_connect(master = "local", config = config)
+sc
+```
+*Create dplyr reference to the Spark DataFrame.*   
+```{r}
+flights_tbl <- tbl(sc, 'flights')
+airlines_tbl <- tbl(sc, 'airlines')
+airports_tbl <- tbl(sc, 'airports')
     
-    flights_tbl
-    airlines_tbl
-    airports_tbl
-    ```
+flights_tbl
+airlines_tbl
+airports_tbl
+```
 
 1. Map the top 10 busiest airports. Size of dots should reflect the number of flights through that destination.  
 Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html) helpful.  
@@ -64,8 +64,8 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
       collect()
     combined <- bind_rows(combine_orig, combine_dest) %>%
       group_by(airport) %>%
-      summarise(Sum = sum(n)) %>%
-      arrange(desc(Sum)) %>%
+      summarise(`Total Flights` = sum(n)) %>%
+      arrange(desc(`Total Flights`)) %>%
       head(10)
     
     # create vector with top 10 airport names
@@ -84,19 +84,56 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     q1$lat <- as.numeric(q1$lat)
     q1$lon <- as.numeric(q1$lon)
     
-    map <- get_map(location = 'united states', zoom = 4)
+    map <- get_googlemap(location = 'united states', zoom = 4)
     top_airports <- ggmap(map) + 
-      geom_point(aes(x = lon, y = lat, size = Sum), data = q1, alpha = .5)
+      geom_point(aes(x = lon, y = lat, size = `Total Flights`), 
+                 data = q1, alpha = .5) +
+      labs(x = "Longitude", y = "Latitude", 
+           title = "Top 10 Busiest Airports in 2002")
     top_airports
+    kable(combined, col.names = c("Airport", "Total Flights"), align = "l")
     ```
 
-2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.
+2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.  
+    *I mapped the top 10 busiest direct routes for the year 2002.*
+    ```{r}
+    # get top 10 busiest routes
+    routes <- flights_yr %>%
+      filter(origin != "Origin") %>% 
+      select(year, origin, dest) %>%
+      group_by(origin, dest) %>%
+      summarise(n = n()) %>%
+      collect() %>%
+      arrange(desc(n)) %>%
+      head(10) %>%
+      ungroup()
+    
+    # get latitude and longitude for origin and dest
+    orig_vector <- routes$origin
+    airports_orig <- airports_tbl %>%
+      select(faa, lat, lon, name) %>%
+      filter(faa %in% orig_vector) %>%
+      collect()
+    location_orig <- left_join(routes, airports_orig, by = c("origin" = "faa")) %>%
+      select(n, origin, lat_orig = lat, lon_orig = lon)
+    
+    dest_vector <- routes$dest
+    airports_dest <- airports_tbl %>%
+      select(faa, lat, lon, name) %>%
+      filter(faa %in% dest_vector) %>%
+      collect()
+    location_dest <- left_join(routes, airports_dest, by = c("dest" = "faa")) %>%
+      select(dest, lat_dest = lat, lon_dest = lon)
+    
+    # combine into one dataframe
+    q2 <- bind_cols(location_orig, location_dest)
+    # write_rds(q2, "q2.rds")
+    q2
+    
+    ```
+
 
 3. LAX:
-  
-    <p align="center">
-    ![](./lax-by-day-98-08.png)
-    </p>
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
 
