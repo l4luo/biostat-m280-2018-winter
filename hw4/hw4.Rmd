@@ -89,7 +89,9 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
       geom_point(aes(x = lon, y = lat, size = `Total Flights`), 
                  data = q1, alpha = .5) +
       labs(x = "Longitude", y = "Latitude", 
-           title = "Top 10 Busiest Airports in 2002")
+           title = "Top 10 Busiest Airports in 2002") +
+      geom_text(aes(vjust = 1, hjust = 1), data = q1, label = q1$airport, 
+                check_overlap = TRUE, size = 3, color = "red2")
     top_airports
     kable(combined, col.names = c("Airport", "Total Flights"), align = "l")
     ```
@@ -128,8 +130,31 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     # combine into one dataframe
     q2 <- bind_cols(location_orig, location_dest)
     # write_rds(q2, "q2.rds")
-    q2
     
+    ## generate map ##
+    
+    q2 <- q2 %>%
+      mutate(prop = n / sum(n))
+    
+    q2$lat_orig <- as.numeric(q2$lat_orig)
+    q2$lon_orig <- as.numeric(q2$lon_orig)
+    q2$lat_dest <- as.numeric(q2$lat_dest)
+    q2$lon_dest <- as.numeric(q2$lon_dest)
+    top_routes <- ggmap(map) +
+      geom_point(data = q2, aes(x = lon_orig, y = lat_orig), 
+                 color = "red", alpha = 0.2 ) +
+      geom_point(data = q2, aes(x = lon_dest, y = lat_dest), 
+                 color = "red", alpha = 0.2) +
+      geom_curve(data = q2, aes(x = lon_orig, y = lat_orig, 
+                                xend = lon_dest, yend = lat_dest), 
+                 arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
+                 alpha = 0.7, size = q2$prop) +
+      labs(x = "Longitude", y = "Latitude", 
+           title = "Top 10 Busiest Direct Routes in 2002") +
+      coord_cartesian()
+    top_routes
+    kable(routes, col.names = c("Origin", "Destination", "Number of Flights"), 
+          align = "l")
     ```
 
 
