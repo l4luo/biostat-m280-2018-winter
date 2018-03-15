@@ -190,19 +190,19 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
 3. LAX:
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?    
-    *PT5:LAX new airport terminal opens.*
+    *PT5:LAX new airport terminal opens??*
     ```{r}
     lax <- flights_tbl %>%
       filter(origin == "LAX" | dest == "LAX" & 
              !is.na(year) & !is.na(month) & !is.na(dayofmonth)) %>%
       filter(year %in% c(1998:2008)) %>%
-      select(origin, year, month, dayofmonth) %>%
+      select(origin, year, month, dayofmonth, dayofweek) %>%
       collect() %>%
       mutate(date = make_date(year, month, dayofmonth))
     # write_rds(lax, "q3lax.rds")
+    # lax <- read_rds("q3lax.rds")
     
     ## generate plot ##
-    
     q3_n <- lax %>%
       count(date)
     
@@ -216,8 +216,12 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     lab3 <- q3_n %>%
       filter(date == ymd(20040704)) %>%
       select(n)
-    
-    
+    lab4 <- q3_n %>%
+      filter(date == ymd(20080101)) %>%
+      select(n)
+    lab5 <- q3_n %>%
+      filter(date == ymd(20001229)) %>%
+      select(n)
     
     q3a <- q3_n %>%
       ggplot(aes(x = date, y = n)) +
@@ -227,9 +231,10 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
         geom_label(aes(x = ymd(20010915), y = lab1, label = "1")) +
         geom_label(aes(x = ymd(20041125), y = lab2, label = "2")) +
         geom_label(aes(x = ymd(20040704), y = lab3, label = "3")) +
-        geom_label(aes(x = ymd(20080105), y = 1260, label = "4")) +
-        geom_label(aes(x = ymd(20011230), y = 1150, label = "5")) 
+        geom_label(aes(x = ymd(20080101), y = lab4, label = "4")) +
+        geom_label(aes(x = ymd(20001229), y = lab5, label = "5")) 
     q3a
+    # ggsave("plot_q3a.png")
     
     # zoom in on each point
     q3_n %>%
@@ -250,21 +255,93 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
         geom_line() +
         geom_label(aes(x = ymd(20040704), y = lab3, label = "3")) +
         ggtitle("Point 3")
-    
-    
-
-    
+    q3_n %>%
+      filter(date %in% c(ymd(20071101):ymd(20080225))) %>%
+      ggplot(aes(x = date, y = n)) +
+        geom_line() +
+        geom_label(aes(x = ymd(20080101), y = lab4, label = "4")) +
+        ggtitle("Point 4")
     ```
 
     (b). Visualize and explain seasonal effects.  
+    *I examined the monthly pattern in air traffic through LAX for the years 2004 through 2007.*
     ```{r}
+    season <- lax %>%
+      filter(year %in% c(2004:2007)) %>%
+      mutate(season = if_else(month %in% c(12, 1, 2), "Winter", 
+                      if_else(month %in% c(3:5), "Spring",
+                      if_else(month %in% c(6:8), "Summer",
+                      if_else(month %in% c(9:11), "Fall", NA_character_))))) %>%
+      count(year, season)
     
+    q3b <- season %>%
+      ggplot() +
+        geom_col(aes(x = year, y = n, fill = season), position = "dodge",
+                 colour = "Black") +
+        labs(x = "Year", y = "Number of Flights", 
+             title = "LAX Air Traffic by Season") +
+        scale_fill_brewer(palette = "Pastel2") 
+    q3b
+    # ggsave("plot_q3b.png")
     ```
     
   
-    (c). Visualize and explain weekly effects.
+    (c). Visualize and explain weekly effects.  
+    *I examined the weekly pattern in air traffic through LAX by counting the cumulative number of flights for each weekday from 1998 to 2008.*
+    ```{r}
+    week <- lax %>%
+      count(dayofweek) %>%
+      mutate(Weekday = replace(dayofweek, c(1, 2, 3, 4, 5, 6, 7), 
+                               c("Mon", "Tues", "Wed", "Thurs", "Fri", 
+                                 "Sat", "Sun")))
+    
+    arranged <- c("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat")
+    q3c <- week %>%
+      ggplot() +
+        geom_col(aes(x = factor(Weekday, levels = arranged), y = n), 
+                 fill = "lightblue2", color = "black") +
+        labs(x = "Year", y = "Number of Flights", 
+             title = "LAX Air Traffic by Weekday") 
+    q3c
+    # ggsave("plot_q3c.png")
+    ```
+    
   
-    (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+    (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.  
+    ```{r}
+    lax_topdest <- flights_tbl %>%
+      filter(origin == "LAX") %>%
+      select(year, origin, dest) %>%
+      count(dest) %>%
+      arrange(desc(n)) %>%
+      collect() %>%
+      head(10)
+    
+    top_dest <- lax_topdest$dest
+    airports_q3 <- airports_tbl %>%
+      select(faa, lat, lon, name) %>%
+      filter(faa %in% top_dest) %>%
+      collect()
+    q3d <- left_join(lax_topdest, airports_q3, by = c("dest" = "faa")) %>%
+      rename(`Total Flights` = n)
+    # write_rds(q3d, "q3d.rds")
+    
+    # convert lat and lon to numeric
+    q3d$lat <- as.numeric(q3d$lat)
+    q3d$lon <- as.numeric(q3d$lon)
+    
+    ## generate map ##
+    lax_topdest_plot <- ggmap(map) + 
+      geom_point(aes(x = lon, y = lat, size = `Total Flights`), 
+                 data = q3d, alpha = .75) +
+      labs(x = "Longitude", y = "Latitude", 
+           title = "Top 10 Destinations from LAX") +
+      geom_label_repel(data = q3d, label = q3d$dest, size = 2)
+    lax_topdest_plot
+    # ggsave("plot_q3d.png")
+
+    ```
+    
     
 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
     
