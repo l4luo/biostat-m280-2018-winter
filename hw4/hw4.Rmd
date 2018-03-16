@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 if (!require("pacman"))  
   install.packages("pacman", repos = "http://cran.us.r-project.org/")
 p_load("sparklyr", "dplyr", "ggplot2", "ggmap", "maps", "mapdata", "knitr", 
-       "ggrepel", "RColorBrewer", "lubridate")
+       "ggrepel", "RColorBrewer", "lubridate", "readr")
 ```
 
 Our Apache Yarn cluster hosts the [flights](http://stat-computing.org/dataexpo/2009/the-data.html) data representing 123 million flights over 22 years. Read the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) on how to access the Yarn cluster. Connect to the database using `sparklyr` and answer following questions. You can base your answers on a specific year or the whole data set.  
@@ -130,8 +130,8 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     # combine into one dataframe
     q2 <- bind_cols(location_orig, location_dest)
     # write_rds(q2, "q2.rds")
+    #q2 <- read_rds("q2.rds")
     
-    q2 <- read_rds("q2.rds")
     ## generate map ##
     
     q2 <- q2 %>%
@@ -350,10 +350,82 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     ```
     
     
-4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.
+4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.  
+  *Performance on test data (from year 2008).*  
+  
+  
+    ```{r}
+    # filter records 
+    model_data <- flights_tbl %>%
+      filter(origin == "LAX") %>%
+      filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+      filter(depdelay > 15 & depdelay < 240) %>%
+      filter(arrdelay > -60 & arrdelay < 360) %>%
+      filter(year >= 2003 & year <= 2007) %>%
+      mutate(weekday = as.character(dayofweek)) %>%
+      select(year, month, weekday, arrdelay, depdelay, distance) 
+      
+    # summarize data by day of week
+    model_data %>%
+      group_by(weekday) %>%
+      summarize(arrdelay = mean(arrdelay), distance = mean(distance), 
+                depdelay = mean(depdelay)) %>%
+      select(weekday, arrdelay, distance, depdelay) %>%
+      arrange(arrdelay)
+    
+    # Partition the data into training and validation sets
+    model_partition <- model_data %>% 
+      sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
+    
+    # Fit a linear model
+    system.time(
+      ml1 <- model_partition$train %>%
+        ml_linear_regression(arrdelay ~ distance + depdelay + weekday)
+    )
+    summary(ml1)
+    
+    
+    # Select data from an out of time sample
+    data_2008 <- flights_tbl %>%
+      filter(origin == "LAX") %>%
+      filter(!is.na(arrdelay) & !is.na(depdelay) & !is.na(distance)) %>%
+      filter(depdelay > 15 & depdelay < 240) %>%
+      filter(arrdelay > -60 & arrdelay < 360) %>%
+      filter(year == 2008) %>%
+      mutate(weekday = as.character(dayofweek)) %>%
+      select(year, month, weekday, arrdelay, depdelay, distance) 
+    
+    # get sum of squares
+    test_model <- sdf_predict(data_2008, ml1) %>%
+      mutate(SS = (prediction - arrdelay) ^ 2) %>%
+      collect
+    # write_rds(test_model, "test_model.rds")
+    
+    # calculate root MSE
+    n <- test_model %>%
+      summarise(n = n())
+    root_mse <- sqrt(sum(test_model$SS)/(n - 4))
+    
+    # summarise data by weekday
+    summary_data <- test_model %>%
+      group_by(weekday) %>%
+      summarise(arrdelay = mean(arrdelay), prediction = mean(prediction), 
+                freq = n()) %>%
+      mutate(Weekday = replace(weekday, c(1, 2, 3, 4, 5, 6, 7), 
+                               c("Mon", "Tues", "Wed", "Thurs", "Fri", 
+                                 "Sat", "Sun")))
+
+    ggplot(summary_data, aes(arrdelay, prediction)) + 
+      geom_point(alpha = 0.75, color = 'red', shape = 3) +
+      geom_abline(intercept = 0, slope = 1, alpha = 0.15, color = 'blue') +
+      geom_text(aes(label = Weekday), size = 3, alpha = 0.75, vjust = -1) +
+      labs(title = 'Average Arrival Delay Forecast', 
+           x = 'Actual Delay (min)', y = 'Predicted Delay (min)')
+    ```
+
     
 5. Visualize and explain any other information you want to explore.  
-    *I mapped the top 10 routes that had flights to SJC (San Jose International Airport) because that is my hometown, and I was interested in visualizing where the majority of people are visiting San Jose from.*
+    *I mapped the top 10 routes that had flights to SJC (San Jose International Airport) because that is my hometown, and I was interested in visualizing where the majority of people are visiting San Jose from. The results show that most flights are incoming from LAX and SAN (San Diego). This is consistent with my experience, as I often flew from SAN to SJC when I did my undergraduate education at UCSD, and now I fly from LAX to SJC. *
     ```{r}
     sjc_top <- flights_tbl %>%
       filter(dest == "SJC") %>%
@@ -399,6 +471,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
            title = "Top 10 Busiest Direct Routes to SJC") +
       scale_fill_manual(values = getPalette(49)) +
       coord_cartesian()
+    sjc_plot
     ```
 
 
