@@ -97,7 +97,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     ```
 
 2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.  
-    *I mapped the top 10 busiest direct routes for the year 2002.*
+    *I mapped the top 10 busiest direct routes for the year 2002. The busiest direct route was from LAX to LAS, with a total of 12,733 flights from 2002.*  
     ```{r}
     # get top 10 busiest routes
     routes <- flights_yr %>%
@@ -116,7 +116,8 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
       select(faa, lat, lon, name) %>%
       filter(faa %in% orig_vector) %>%
       collect()
-    location_orig <- left_join(routes, airports_orig, by = c("origin" = "faa")) %>%
+    location_orig <- left_join(routes, airports_orig, 
+                               by = c("origin" = "faa")) %>%
       select(n, origin, lat_orig = lat, lon_orig = lon)
     
     dest_vector <- routes$dest
@@ -124,13 +125,14 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
       select(faa, lat, lon, name) %>%
       filter(faa %in% dest_vector) %>%
       collect()
-    location_dest <- left_join(routes, airports_dest, by = c("dest" = "faa")) %>%
+    location_dest <- left_join(routes, airports_dest, 
+                               by = c("dest" = "faa")) %>%
       select(dest, lat_dest = lat, lon_dest = lon)
     
     # combine into one dataframe
     q2 <- bind_cols(location_orig, location_dest)
     # write_rds(q2, "q2.rds")
-    #q2 <- read_rds("q2.rds")
+    # q2 <- read_rds("q2.rds")
     
     ## generate map ##
     
@@ -191,7 +193,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
 3. LAX:
 
     (a). Reproduce above plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?    
-    *PT5:LAX new airport terminal opens??*
+    *I reproduced the plot of LAX air traffic from 1998 to 2008. The y-axis represents the number of flights in a day, and the x-axis represents the date. I zoomed in on points 1 - 5. A dramatic decrease in the number of flights to/from LAX is observed at point 1 (around the end of 2001). This may be explained by the September 11 attacks, as the decrease occurred right after that time period. The September 11 attacks significantly affected the number of flights, as the flights per day from LAX dropped from around 1400 to a low of around 800 flights towards the end of 2001. The number of flights also decreased drastically at points 2 and 3. The number of flights on Point 2 (November 25, 2004) was also significantly lower than the days around it (see zoomed-in plot). November 25, 2004 was Thanksgiving Day, which explains why the number of flights that day was significantly lower, as people usually fly before or after holidays but not on the holiday itself. The dramatic decrease in the number of flights on Point 3 (July 4, 2004) can also be explained by this reason, as it was Independence Day. There is also a drop in flights around point 4 (end of 2007/beginning of 2008). As point 4 occurs around the holiday season (Christmas/New Years), it makes sense that people are enjoying the holidays. Similarly, the increase in flights around point 5 occurs after New Years of 2001, when people are returning to work/school after the holidays.*  
     ```{r}
     lax <- flights_tbl %>%
       filter(origin == "LAX" | dest == "LAX" & 
@@ -271,7 +273,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     ```
 
     (b). Visualize and explain seasonal effects.  
-    *I examined the monthly pattern in air traffic through LAX for the years 2004 through 2007.*
+    *I examined the seasonal pattern in air traffic through LAX for the years 2004 through 2007. It appears that summer consistently has the highest number of flights, and winter has the lowest number of flights. Because students are on summer break, families often travel more in the summer, which explains why the highest number of flights occurs in the summer. One possible reason for the lowest number of flights in winter is weather conditions, making travel less popular.*  
     ```{r}
     season <- lax %>%
       filter(year %in% c(2004:2007)) %>%
@@ -294,7 +296,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     
   
     (c). Visualize and explain weekly effects.  
-    *I examined the weekly pattern in air traffic through LAX by counting the cumulative number of flights for each weekday from 1998 to 2008.*
+    *I examined the weekly pattern in air traffic through LAX by counting the cumulative number of flights for each weekday from 1998 to 2008. The least amount of people fly on Saturday, and the highest amount of people fly on Friday or Monday. This makes sense, because people usually fly before/after the weekend so that they can enjoy their weekend where they want.*  
     ```{r}
     week <- lax %>%
       count(dayofweek) %>%
@@ -315,6 +317,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     
   
     (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.  
+    *I mapped the top 10 destinations from LAX. The most popular destination is SFO, with a cumulative total of 336,938 flights. A majority of the destinations cumulate on the West Coast (California, Arizona, Washington.*  
     ```{r}
     lax_topdest <- flights_tbl %>%
       filter(origin == "LAX") %>%
@@ -351,9 +354,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     
     
 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. Use the same filtering criteria as in the [lecture notes](http://hua-zhou.github.io/teaching/biostatm280-2018winter/slides/12-sparklyr/sparklyr-flights.html) to construct training and validation sets. You are allowed to use a maximum of 5 predictors. The prediction performance of your model on the validation data set will be an important factor for grading this question.  
-  *Performance on test data (from year 2008).*  
-  
-  
+  *I filtered the records to flights flying from LAX and from the years 2003 to 2007. I partitioned the data into training and validation sets. I chose distance, departure delay, and day of week as my three predictors for arrival delay. I fitted a linear regression model from the training data and obtained a root MSE of 13.43.*  
     ```{r}
     # filter records 
     model_data <- flights_tbl %>%
@@ -383,8 +384,43 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
         ml_linear_regression(arrdelay ~ distance + depdelay + weekday)
     )
     summary(ml1)
+    ```
+
+    **Assess Model Performance**  
+    *I compared the model performance using the validation data. I compared the training data and validation data by decile. *
+    ```{r}
+    # Calculate average gains by predicted decile
+    system.time(
+      model_deciles <- lapply(model_partition, function(x) {
+        sdf_predict(ml1, x) %>%
+          mutate(decile = ntile(desc(prediction), 10)) %>%
+          group_by(decile) %>%
+          summarise(arrdelay = mean(arrdelay)) %>%
+          select(decile, arrdelay) %>%
+          collect()
+      })
+    )
     
+    # Create a summary dataset for plotting
+    deciles <- rbind(
+      data.frame(data = 'train', model_deciles$train),
+      data.frame(data = 'valid', model_deciles$valid),
+      make.row.names = FALSE
+    )
+    deciles
     
+    # Plot average gains by predicted decile
+    deciles %>%
+      ggplot(aes(factor(decile), arrdelay, fill = data)) +
+        geom_bar(stat = 'identity', position = 'dodge') +
+        labs(title = 'Average arrival delay by predicted decile', 
+             x = 'Decile', y = 'Minutes')
+    #ggsave("deciles.png")
+    ```
+
+
+    
+    ```{r}    
     # Select data from an out of time sample
     data_2008 <- flights_tbl %>%
       filter(origin == "LAX") %>%
@@ -425,7 +461,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
 
     
 5. Visualize and explain any other information you want to explore.  
-    *I mapped the top 10 routes that had flights to SJC (San Jose International Airport) because that is my hometown, and I was interested in visualizing where the majority of people are visiting San Jose from. The results show that most flights are incoming from LAX and SAN (San Diego). This is consistent with my experience, as I often flew from SAN to SJC when I did my undergraduate education at UCSD, and now I fly from LAX to SJC. *
+    *I mapped the top 10 routes that had flights to SJC (San Jose International Airport) because that is my hometown, and I was interested in visualizing where the majority of people are visiting San Jose from. The results show that most flights are incoming from LAX and SAN (San Diego). This is consistent with my experience, as I often flew from SAN to SJC when I did my undergraduate education at UCSD, and now I fly from LAX to SJC.*
     ```{r}
     sjc_top <- flights_tbl %>%
       filter(dest == "SJC") %>%
@@ -446,8 +482,8 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     q5$lat <- as.numeric(q5$lat)
     q5$lon <- as.numeric(q5$lon)
     
-    q5 <- q5 %>%
-      mutate(lon_end = -121.9290, lat_end = 37.3626)
+    # q5 <- q5 %>%
+    #  mutate(lon_end = -121.9290, lat_end = 37.3626)
     # write_rds(q5, "q5.rds")
     
     ## generate map ##
@@ -461,7 +497,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
                    color = "white") + 
                   coord_fixed(1.3) + guides(fill = FALSE) +
       geom_point(data = q5, aes(x = lon, y = lat, size = n), alpha = 0.5) +
-      geom_point(data = q5, aes(x = lon_end, y = lat_end), alpha = 0.7) +
+      geom_point(data = q5, aes(x = -121.9290, y = 37.3626), alpha = 0.7) +
       geom_curve(data = q5, aes(x = lon, y = lat, 
                                 xend = lon_end, yend = lat_end), 
                  arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
