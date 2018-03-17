@@ -317,7 +317,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     
   
     (d). Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.  
-    *I mapped the top 10 destinations from LAX. The most popular destination is SFO, with a cumulative total of 336,938 flights. A majority of the destinations cumulate on the West Coast (California, Arizona, Washington.*  
+    *I mapped the top 10 destinations from LAX. The most popular destination is SFO, with a cumulative total of 336,938 flights. A majority of the destinations cumulate on the West Coast (California, Arizona, Washington).*  
     ```{r}
     lax_topdest <- flights_tbl %>%
       filter(origin == "LAX") %>%
@@ -489,8 +489,6 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
     q5$lat <- as.numeric(q5$lat)
     q5$lon <- as.numeric(q5$lon)
     
-    # q5 <- q5 %>%
-    #  mutate(lon_end = -121.9290, lat_end = 37.3626)
     # write_rds(q5, "q5.rds")
     
     ## generate map ##
@@ -504,9 +502,8 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
                    color = "white") + 
                   coord_fixed(1.3) + guides(fill = FALSE) +
       geom_point(data = q5, aes(x = lon, y = lat, size = n), alpha = 0.5) +
-      geom_point(data = q5, aes(x = -121.9290, y = 37.3626), alpha = 0.7) +
       geom_curve(data = q5, aes(x = lon, y = lat, 
-                                xend = lon_end, yend = lat_end), 
+                                xend = -121.9290, yend = 37.3626), 
                  arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
       geom_label_repel(aes(x = lon, y = lat), data = q5, 
                        label = q5$origin, size = 2) +
@@ -521,7 +518,7 @@ Hint: You may find this tutorial on [Making Maps in R](http://eriqande.github.io
 
 
 ```{r}
-spark_disconnect(sc)
+spark_disconnect_all()
 ```
 
   
